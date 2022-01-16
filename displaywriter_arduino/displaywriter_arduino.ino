@@ -9,15 +9,17 @@
 
 
 /// Test pins
-const int VOutPin = A2;
 const int CapacitorVoltagePin = A0;
+const int ChargePin = A1;
+const int DischargePin = A2;
 
 /// Basic values
 const int KeyPressedTime = 500;  // key is down if charge time > this value
 const int TargetVoltage = 1.0;
 
 /// Capacitor monitoring
-unsigned long time = 0;
+unsigned long start_time = 0;
+unsigned long elapsed_time = 0;
 float capacitorVoltage = 0;
 
 
@@ -26,8 +28,11 @@ float capacitorVoltage = 0;
  */
 void drainCapacitor()
 {
-  digitalWrite(VOutPin, LOW);
-  delay(1);
+  digitalWrite(ChargePin, LOW);
+  pinMode(DischargePin, OUTPUT);  // Set the discharge pin to output to sink more current
+  digitalWrite(DischargePin, LOW);
+  while(analogRead(CapacitorVoltagePin) > 0) { ; }
+  pinMode(DischargePin, INPUT);  // Set back to input mode, where it won't affect the circuitry.
 }
 
 
@@ -36,23 +41,22 @@ void drainCapacitor()
  */
 int printChargeTime()
 {
-  time = micros();
+  // Charge capacitor
+  digitalWrite(ChargePin, HIGH);
 
-  digitalWrite(VOutPin, HIGH);
+  start_time = micros();
 
-  while (true) {
-    capacitorVoltage = analogRead(CapacitorVoltagePin) / 1024.0 * 5.0;
-    if (capacitorVoltage > (TargetVoltage / 5 * 1024)) {
-      break;
-    }
-    /* Serial.print("Capacitor Voltage: "); */
-    /* Serial.print(capacitorVoltage); */
-    /* Serial.println("V"); */
+  while (analogRead(CapacitorVoltagePin) < 200) { // 647 is 63.2% of 1023
+    /* capacitorVoltage =  / 1024.0 * 5.0; */
+    /* if (capacitorVoltage > (TargetVoltage / 5 * 1024)) { */
+    /*   break; */
+    /* } */
+    Serial.print("Capacitor Voltage: ");
+    Serial.print(analogRead(CapacitorVoltagePin));
+    Serial.println("/1023");
   }
   
-  time = micros() - time;
-
-  digitalWrite(VOutPin, LOW);
+  elapsed_time = micros() - start_time;
 
   /* if (time > KeyPressedTime) { */
   /*   Serial.print("Key pressed!"); */
@@ -60,7 +64,7 @@ int printChargeTime()
   /* } */
   
   Serial.print("Capacitor voltage took ");
-  Serial.print(time);
+  Serial.print(elapsed_time);
   Serial.println(" microseconds to charge.");
 }
 
@@ -69,8 +73,8 @@ void setup()
 {
   Serial.begin(9600);
   
-  pinMode(VOutPin, OUTPUT);
-  pinMode(CapacitorVoltagePin, INPUT);
+  pinMode(ChargePin, OUTPUT);
+  digitalWrite(ChargePin, LOW);
 
   drainCapacitor();
 }
@@ -79,5 +83,5 @@ void setup()
 void loop()
 {
   printChargeTime();
-  /* delay(2); */
+  drainCapacitor();
 }
