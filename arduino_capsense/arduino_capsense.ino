@@ -15,8 +15,7 @@
 #endif
 
 // Sense pins
-const byte COMPARATOR_OUT = 7;
-const byte CAP_OUT = 3;
+const byte COMPARATOR_OUT = 4;
 
 // Timing variables
 volatile unsigned long start_time = 0;
@@ -33,7 +32,7 @@ void setup_clockout()
   // set up Timer 1
   TCCR1A = bit (COM1A0);  // toggle OC1A on Compare Match
   TCCR1B = bit (WGM12) | bit (CS10);   // CTC, no prescaling
-  OCR1A =  8;       // output every 256th cycle
+  OCR1A = 256;       // output every 256th cycle
 }
 
 
@@ -43,8 +42,6 @@ void setup_sense_pin(byte sense_pin)
    * Configure the sensing pin
    */
   pinMode(sense_pin, INPUT_PULLUP);
-  /* attachInterrupt(digitalPinToInterrupt(sense_pin), rise, RISING); */
-  /* attachInterrupt(digitalPinToInterrupt(sense_pin), fall, FALLING); */
 }
 
 
@@ -62,6 +59,7 @@ void loop()
     Serial.print(micros());
     Serial.println("Key pressed!");
   }
+  delay(100);
 }
 
 
@@ -74,5 +72,5 @@ void rise()
 void fall()
 {
   end_time = micros();
-  Serial.println(end_time - start_time);
+  
 }
