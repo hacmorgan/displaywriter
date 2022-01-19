@@ -84,11 +84,14 @@ void print_keyboard(bool analog_read = false)
 }
 
 
-void send_scan_to_pc()
+void send_scan_to_pc(bool analog_read=true)
 {
   for (int row = 0; row < ROWS; row++) {
     for (int col = 0; col < COLUMNS; col++) {
         Serial.print(key_state[row][col]);
+        if (analog_read) {
+          Serial.print(",");
+        }
     }
   }
   Serial.println();
@@ -105,6 +108,6 @@ void setup()
 void loop()
 {
   /* while (Serial.availableForWrite() < message_size) { ; } */
-  scan_keyboard(analog_read=false);
-  send_scan_to_pc();
+  scan_keyboard(analog_read=true);
+  send_scan_to_pc(analog_read=true);
 }
