@@ -26,84 +26,7 @@ import serial
 """
 Position indices of each key's character in the string received from the arduino.
 """
-KEYS = {
-    # Modifiers & control keys
-    93: {"name": "left_alt"},
-    87: {"name": "right_alt"},
-    94: {"name": "space"},
-    9: {"name": "left shift"},
-    2: {"name": "right shift"},
-    21: {"name": "caps lock"},
-    8: {"name": "ctrl"},  # ¶ (pilcrow) key
-    33: {"name": "tab"},
-    50: {"name": "backspace"},
-    62: {"name": "return"},
-    47: {"name": "escape"},
-    # Arrows
-    73: {"name": "up"},
-    13: {"name": "down"},
-    85: {"name": "left"},
-    1: {"name": "right"},
-    # Nav cluster
-    49: {"name": "delete"},  # (del)
-    61: {"name": "insert"},  # (chg fmt/instr)
-    37: {"name": "home"},  # (move/copy)
-    25: {"name": "end"},  # (get)
-    48: {"name": "page up"},  # (line adj)
-    60: {"name": "page down"},  # (page end/reqd)
-    # Number row
-    56: {"name": "1"},
-    44: {"name": "2"},
-    55: {"name": "3"},
-    43: {"name": "4"},
-    54: {"name": "5"},
-    42: {"name": "6"},
-    53: {"name": "7"},
-    41: {"name": "8"},
-    52: {"name": "9"},
-    40: {"name": "0"},
-    # Alphabet
-    68: {"name": "q"},
-    32: {"name": "w"},  # a guess, not registering properly
-    67: {"name": "e"},
-    31: {"name": "r"},
-    66: {"name": "t"},
-    30: {"name": "y"},
-    65: {"name": "u"},
-    29: {"name": "i"},
-    64: {"name": "o"},
-    28: {"name": "p"},
-    80: {"name": "a"},
-    20: {"name": "s"},
-    79: {"name": "d"},
-    19: {"name": "f"},
-    78: {"name": "g"},
-    18: {"name": "h"},
-    77: {"name": "j"},
-    17: {"name": "k"},
-    76: {"name": "l"},
-    92: {"name": "z"},
-    7: {"name": "x"},
-    91: {"name": "c"},
-    6: {"name": "v"},
-    90: {"name": "b"},
-    5: {"name": "n"},
-    89: {"name": "m"},
-
-    # Punctuation
-    45: {"name": "`"},  # ±/° (plus minus/degrees) key
-    88: {"name": "."},
-    4: {"name": ","},
-    15: {"name": "\\"},  # (3 2), until 75 works
-    3: {"name": "/"},
-    75: {"name": "'"},  # registers when not pressed
-    # 38: {"name": "\\"},  # (index)
-    16: {"name": ";"},
-    63: {"name": "["},  # (1/4 1/2)
-    27: {"name": "]"},  # ([ ])
-    51: {"name": "-"},
-    39: {"name": "="},
-}
+KEYS = {}  # filled in from calibration file
 NUM_KEYS = 96;
 
 
@@ -143,6 +66,9 @@ def measure_voltages(samples: int = 25) -> tuple[list[int], list[int]]:
 
 
 def detect_likely_keys() -> None:
+    """
+    
+    """
     print("Measuring baseline voltages in 3s... don't press any keys!")
     time.sleep(3)
     print("Measuring baseline voltages...")
@@ -152,7 +78,7 @@ def detect_likely_keys() -> None:
         new_mean_voltages, new_stddev_voltages = measure_voltages()
         mean_voltage_diffs = new_mean_voltages - mean_voltages
         for order, idx in zip(range(10), reversed(np.argsort(mean_voltage_diffs))):
-            print(f"{order}th biggest vdiff: {mean_voltage_diffs[idx]} (key index: {idx})")
+            print(f"{order}th biggest vdiff: {mean_voltage_diffs[idx]} (key index: {idx}, mean voltage: {new_mean_voltages[idx]})")
         print("\n")
     
 
@@ -203,15 +129,17 @@ def press_keys(keyscan: KeyScan, pressed_keys: set, dry_run: bool = False) -> No
                 if dry_run:
                     print(f"Pressing: {KEYS[idx]} (measured voltage: {voltage})")
                 else:
+                    key = KEYS[idx]["scancode"] if "scancode" in KEYS[idx] else KEYS[idx]["name"]
                     if "press_and_release" in KEYS[idx] and KEYS[idx]["press_and_release"]:
-                        keyboard.press_and_release(KEYS[idx]["name"])
-                    keyboard.press(KEYS[idx]["name"])
+                        keyboard.press_and_release(key)                    
+                    keyboard.press(key)
                 pressed_keys.add(idx)
             elif idx in pressed_keys and not key_pressed(voltage, idx):
                 if dry_run:
                     print(f"Releasing: {KEYS[idx]}")
                 else:
-                    keyboard.release(KEYS[IDX]["name"])
+                    key = KEYS[idx]["scancode"] if "scancode" in KEYS[idx] else KEYS[idx]["name"]
+                    keyboard.release(key)
                 pressed_keys.remove(idx);
 
 
@@ -223,21 +151,29 @@ def check_dry_run() -> bool:
                 
 
 def main() -> int:
+    
     pressed_keys = set()
+    
     if "--raw" in sys.argv:
         print(measure_voltages())
         return 0
+    
     if "--detect" in sys.argv:
         print(detect_likely_keys())
         return 0
+    
+    with open("/home/hamish/src/displaywriter/calibration.json", "r") as cal_file:
+        for str_idx, cfg in json.load(cal_file).items():
+            KEYS[int(str_idx)] = cfg
+
     if "--calibrate" in sys.argv:
         calibrate_keyboard()
-    else:
-        with open("calibration.json", "r") as cal_file:
-            for idx, cfg in json.load(cal_file).items():
-                KEYS[int(idx)].update(cfg)
+        with open("/home/hamish/src/displaywriter/calibration.json", "w") as cal_file:
+            json.dump(KEYS, cal_file)
+
     for keyscan in read_keyscans():
         press_keys(keyscan, pressed_keys, check_dry_run())
+
     return 0
 
 
