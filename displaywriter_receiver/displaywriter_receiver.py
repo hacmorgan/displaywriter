@@ -12,7 +12,9 @@ Convert raw signal from arduino into keystrokes.
 """
 
 
+import json
 import sys
+import time
 
 from typing import Iterator
 
@@ -31,10 +33,12 @@ KEYS = {
     94: {"name": "space"},
     9: {"name": "left shift"},
     2: {"name": "right shift"},
+    21: {"name": "caps lock"},
     8: {"name": "ctrl"},  # ¶ (pilcrow) key
     33: {"name": "tab"},
     50: {"name": "backspace"},
     62: {"name": "return"},
+    47: {"name": "escape"},
     # Arrows
     73: {"name": "up"},
     13: {"name": "down"},
@@ -60,8 +64,7 @@ KEYS = {
     40: {"name": "0"},
     # Alphabet
     68: {"name": "q"},
-    # 32: {"name": "w"},  # a guess, not registering properly
-    34: {"name": "w"},  # temp w, left of tab
+    32: {"name": "w"},  # a guess, not registering properly
     67: {"name": "e"},
     31: {"name": "r"},
     66: {"name": "t"},
@@ -86,15 +89,16 @@ KEYS = {
     90: {"name": "b"},
     5: {"name": "n"},
     89: {"name": "m"},
+
     # Punctuation
     45: {"name": "`"},  # ±/° (plus minus/degrees) key
     88: {"name": "."},
     4: {"name": ","},
+    15: {"name": "\\"},  # (3 2), until 75 works
     3: {"name": "/"},
-    # 75: {"name": "'"},  # registers when not pressed
-    38: {"name": "\\"},  # (index)
+    75: {"name": "'"},  # registers when not pressed
+    # 38: {"name": "\\"},  # (index)
     16: {"name": ";"},
-    15: {"name": "'"},  # (3 2), until 75 works
     63: {"name": "["},  # (1/4 1/2)
     27: {"name": "]"},  # ([ ])
     51: {"name": "-"},
@@ -115,31 +119,79 @@ def read_keyscans(
     """
     with serial.Serial(port=device, baudrate=baudrate, timeout=1.0) as ser:
         while True:
-            line = str(ser.readline().strip(), "UTF-8")
-            if line:
-                voltages = line.split(",")[:-1]
-                if len(voltages) < NUM_KEYS:
-                    continue
-                # print(len(line.split(",")[:-1]), file=sys.stderr)
-                yield [int(voltage) for voltage in line.split(",")[:-1]]
+            voltage_bytestrings = ser.readline().strip().split(b",")[:-1]
+            if len(voltage_bytestrings) != NUM_KEYS:
+                continue
+            try:
+                yield [int(voltage) for voltage in voltage_bytestrings]
+            except ValueError:
+                continue
 
 
-def calibrate_keyboard(samples: int = 100):
+def measure_voltages(samples: int = 25) -> tuple[list[int], list[int]]:
+    """
+    Measure the voltages of each key over a period of time
+
+    @param[in] samples How many times to sample the keyboard
+    @retval Mean voltage for each key
+    @retval Stddev voltage for each key
+    """
+    voltages = np.zeros((samples, NUM_KEYS), dtype=int)
+    for idx, keyscan in zip(range(samples), read_keyscans()):
+        voltages[idx, :] = keyscan
+    return np.mean(voltages, axis=0), np.std(voltages, axis=0)
+
+
+def detect_likely_keys() -> None:
+    print("Measuring baseline voltages in 3s... don't press any keys!")
+    time.sleep(3)
+    print("Measuring baseline voltages...")
+    mean_voltages, stddev_voltages = measure_voltages()
+    print("Done!")
+    while True:
+        new_mean_voltages, new_stddev_voltages = measure_voltages()
+        mean_voltage_diffs = new_mean_voltages - mean_voltages
+        for order, idx in zip(range(10), reversed(np.argsort(mean_voltage_diffs))):
+            print(f"{order}th biggest vdiff: {mean_voltage_diffs[idx]} (key index: {idx})")
+        print("\n")
+    
+
+            
+def calibrate_keyboard(calibration_file = "calibration.json", samples: int = 50):
     """
     Read the keyboard for a while to determine expected voltages on each key.
     """
     print("Calibrating keyboard...", file=sys.stderr)
-    nominal_voltages = {}
-    for idx in KEYS:
-        nominal_voltages[idx] = []
-    for _, keyscan in zip(range(samples), read_keyscans()):
-        for idx in KEYS:
-            nominal_voltages[idx].append(keyscan[idx])
-    for idx in KEYS:
-        KEYS[idx]["nominal_voltage"] = np.mean(nominal_voltages[idx])
-        KEYS[idx]["voltage_std_dev"] = np.std(nominal_voltages[idx])
-    print("Calibration complete!", file=sys.stderr)
 
+    print("Measuring key voltages unpressed...", file=sys.stderr)
+    mean_voltages, stddev_voltages = measure_voltages()
+    for idx in KEYS:
+        KEYS[idx]["nominal_unpressed_voltage"] = mean_voltages[idx]
+        KEYS[idx]["nominal_unpressed_voltage_stddev"] = stddev_voltages[idx]
+
+    print("Measuring key voltages when pressed...", file=sys.stderr)
+    for idx in KEYS:
+        print(f"Measuring {KEYS[idx]['name']} in 3s...")
+        time.sleep(3.0)
+        print("Measuring now...")
+        mean_voltages, stddev_voltages = measure_voltages()
+        KEYS[idx]["nominal_pressed_voltage"] = mean_voltages[idx]
+        KEYS[idx]["nominal_pressed_voltage_stddev"] = stddev_voltages[idx]
+        print(f"Finished measuring {KEYS[idx]['name']} now...")
+
+    print(f"Calibration complete! Writing to file: {calibration_file}", file=sys.stderr)
+    with open(calibration_file, "w") as cal_file:
+        json.dump(KEYS, cal_file)
+
+
+def key_pressed(voltage: int, idx: int) -> bool:
+    """
+    Return True if key is pressed, False otherwise
+    """
+    if "voltage_threshold" in KEYS[idx]:
+        return voltage > KEYS[idx]["voltage_threshold"]
+    return abs(voltage - KEYS[idx]["nominal_unpressed_voltage"]) > abs(voltage - KEYS[idx]["nominal_pressed_voltage"])
+        
 
 def press_keys(keyscan: KeyScan, pressed_keys: set, dry_run: bool = False) -> None:
     """
@@ -147,19 +199,19 @@ def press_keys(keyscan: KeyScan, pressed_keys: set, dry_run: bool = False) -> No
     """
     for idx, voltage in enumerate(keyscan):
         if idx in KEYS:
-            vdiff = voltage - KEYS[idx]["nominal_voltage"]
-            # if vdiff > 2 * KEYS[idx]["voltage_std_dev"]:
-            if vdiff > 150:
+            if idx not in pressed_keys and key_pressed(voltage, idx):
                 if dry_run:
-                    print(f"Pressing: {KEYS[idx]}")
+                    print(f"Pressing: {KEYS[idx]} (measured voltage: {voltage})")
                 else:
+                    if "press_and_release" in KEYS[idx] and KEYS[idx]["press_and_release"]:
+                        keyboard.press_and_release(KEYS[idx]["name"])
                     keyboard.press(KEYS[idx]["name"])
-                    pressed_keys.add(idx)
-        if idx in pressed_keys and state == 0:
-            if dry_run:
-                print(f"Releasing: {KEYS[idx]}")
-            else:
-                keyboard.release(KEYS[IDX]["name"])
+                pressed_keys.add(idx)
+            elif idx in pressed_keys and not key_pressed(voltage, idx):
+                if dry_run:
+                    print(f"Releasing: {KEYS[idx]}")
+                else:
+                    keyboard.release(KEYS[IDX]["name"])
                 pressed_keys.remove(idx);
 
 
@@ -172,7 +224,18 @@ def check_dry_run() -> bool:
 
 def main() -> int:
     pressed_keys = set()
-    calibrate_keyboard()
+    if "--raw" in sys.argv:
+        print(measure_voltages())
+        return 0
+    if "--detect" in sys.argv:
+        print(detect_likely_keys())
+        return 0
+    if "--calibrate" in sys.argv:
+        calibrate_keyboard()
+    else:
+        with open("calibration.json", "r") as cal_file:
+            for idx, cfg in json.load(cal_file).items():
+                KEYS[int(idx)].update(cfg)
     for keyscan in read_keyscans():
         press_keys(keyscan, pressed_keys, check_dry_run())
     return 0

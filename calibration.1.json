@@ -1,0 +1,471 @@
+{
+  "93": {
+    "name": "left_alt",
+    "nominal_unpressed_voltage": 317.76,
+    "nominal_unpressed_voltage_stddev": 17.030044039872593,
+    "nominal_pressed_voltage": 932.84,
+    "nominal_pressed_voltage_stddev": 0.6118823416311343
+  },
+  "87": {
+    "name": "right_alt",
+    "nominal_unpressed_voltage": 323.96,
+    "nominal_unpressed_voltage_stddev": 8.60920437671217,
+    "nominal_pressed_voltage": 965.08,
+    "nominal_pressed_voltage_stddev": 2.3481056194302683
+  },
+  "94": {
+    "name": "space",
+    "nominal_unpressed_voltage": 304.76,
+    "nominal_unpressed_voltage_stddev": 2.2321290285285933,
+    "nominal_pressed_voltage": 885.76,
+    "nominal_pressed_voltage_stddev": 4.589379042964309
+  },
+  "9": {
+    "name": "left shift",
+    "nominal_unpressed_voltage": 368.6,
+    "nominal_unpressed_voltage_stddev": 25.08226465054541,
+    "nominal_pressed_voltage": 908.64,
+    "nominal_pressed_voltage_stddev": 9.015009706040253
+  },
+  "2": {
+    "name": "right shift",
+    "nominal_unpressed_voltage": 372.44,
+    "nominal_unpressed_voltage_stddev": 17.449538675850434,
+    "nominal_pressed_voltage": 956.48,
+    "nominal_pressed_voltage_stddev": 0.8997777503361593
+  },
+  "8": {
+    "name": "ctrl",
+    "nominal_unpressed_voltage": 359.04,
+    "nominal_unpressed_voltage_stddev": 2.125652840893827,
+    "nominal_pressed_voltage": 906.08,
+    "nominal_pressed_voltage_stddev": 0.7959899496852959
+  },
+  "33": {
+    "name": "tab",
+    "nominal_unpressed_voltage": 385.8,
+    "nominal_unpressed_voltage_stddev": 2.3999999999999995,
+    "nominal_pressed_voltage": 901.52,
+    "nominal_pressed_voltage_stddev": 7.547820877577844
+  },
+  "50": {
+    "name": "backspace",
+    "nominal_unpressed_voltage": 397.84,
+    "nominal_unpressed_voltage_stddev": 2.540551121312067,
+    "nominal_pressed_voltage": 903.4,
+    "nominal_pressed_voltage_stddev": 1.4142135623730951
+  },
+  "62": {
+    "name": "return",
+    "nominal_unpressed_voltage": 368.36,
+    "nominal_unpressed_voltage_stddev": 1.9571407716360112,
+    "nominal_pressed_voltage": 917.84,
+    "nominal_pressed_voltage_stddev": 0.7838367176906171
+  },
+  "47": {
+    "name": "escape",
+    "nominal_unpressed_voltage": 275.16,
+    "nominal_unpressed_voltage_stddev": 2.7521627858831312,
+    "nominal_pressed_voltage": 879.28,
+    "nominal_pressed_voltage_stddev": 1.4288456879593403
+  },
+  "73": {
+    "name": "up",
+    "nominal_unpressed_voltage": 88.12,
+    "nominal_unpressed_voltage_stddev": 0.9516301802696259,
+    "nominal_pressed_voltage": 393.88,
+    "nominal_pressed_voltage_stddev": 0.6523802572120039
+  },
+  "13": {
+    "name": "down",
+    "nominal_unpressed_voltage": 366.4,
+    "nominal_unpressed_voltage_stddev": 1.9390719429665317,
+    "nominal_pressed_voltage": 899.72,
+    "nominal_pressed_voltage_stddev": 6.732131906016101
+  },
+  "85": {
+    "name": "left",
+    "nominal_unpressed_voltage": 316.16,
+    "nominal_unpressed_voltage_stddev": 9.747533021231575,
+    "nominal_pressed_voltage": 887.68,
+    "nominal_pressed_voltage_stddev": 0.6144916598294886
+  },
+  "1": {
+    "name": "right",
+    "nominal_unpressed_voltage": 365.6,
+    "nominal_unpressed_voltage_stddev": 2.1725560982400434,
+    "nominal_pressed_voltage": 908.04,
+    "nominal_pressed_voltage_stddev": 8.214523723259921
+  },
+  "49": {
+    "name": "delete",
+    "nominal_unpressed_voltage": 403.68,
+    "nominal_unpressed_voltage_stddev": 2.541180827882974,
+    "nominal_pressed_voltage": 889.6,
+    "nominal_pressed_voltage_stddev": 0.9380831519646861
+  },
+  "61": {
+    "name": "insert",
+    "nominal_unpressed_voltage": 373.08,
+    "nominal_unpressed_voltage_stddev": 2.1894291493446416,
+    "nominal_pressed_voltage": 884.84,
+    "nominal_pressed_voltage_stddev": 0.8333066662399864
+  },
+  "37": {
+    "name": "home",
+    "nominal_unpressed_voltage": 397.4,
+    "nominal_unpressed_voltage_stddev": 2.349468024894146,
+    "nominal_pressed_voltage": 915.8,
+    "nominal_pressed_voltage_stddev": 11.25699782357623
+  },
+  "25": {
+    "name": "end",
+    "nominal_unpressed_voltage": 373.04,
+    "nominal_unpressed_voltage_stddev": 9.514115828599103,
+    "nominal_pressed_voltage": 901.24,
+    "nominal_pressed_voltage_stddev": 19.043697120044733
+  },
+  "48": {
+    "name": "page up",
+    "nominal_unpressed_voltage": 364.24,
+    "nominal_unpressed_voltage_stddev": 2.2852570971337123,
+    "nominal_pressed_voltage": 744.92,
+    "nominal_pressed_voltage_stddev": 1.6714065932620943
+  },
+  "60": {
+    "name": "page down",
+    "nominal_unpressed_voltage": 338.2,
+    "nominal_unpressed_voltage_stddev": 2.842534080710379,
+    "nominal_pressed_voltage": 522.4,
+    "nominal_pressed_voltage_stddev": 76.74268694800828
+  },
+  "56": {
+    "name": "1",
+    "nominal_unpressed_voltage": 393.8,
+    "nominal_unpressed_voltage_stddev": 2.5455844122715705,
+    "nominal_pressed_voltage": 888.12,
+    "nominal_pressed_voltage_stddev": 8.869362998547302
+  },
+  "44": {
+    "name": "2",
+    "nominal_unpressed_voltage": 374.16,
+    "nominal_unpressed_voltage_stddev": 13.058882034845094,
+    "nominal_pressed_voltage": 896.56,
+    "nominal_pressed_voltage_stddev": 1.0613199329137282
+  },
+  "55": {
+    "name": "3",
+    "nominal_unpressed_voltage": 385.16,
+    "nominal_unpressed_voltage_stddev": 2.556247249387273,
+    "nominal_pressed_voltage": 890.52,
+    "nominal_pressed_voltage_stddev": 0.9846826900072936
+  },
+  "43": {
+    "name": "4",
+    "nominal_unpressed_voltage": 374.36,
+    "nominal_unpressed_voltage_stddev": 34.51014923178397,
+    "nominal_pressed_voltage": 916.16,
+    "nominal_pressed_voltage_stddev": 14.86117088253816
+  },
+  "54": {
+    "name": "5",
+    "nominal_unpressed_voltage": 401.48,
+    "nominal_unpressed_voltage_stddev": 2.6095210288480155,
+    "nominal_pressed_voltage": 892.84,
+    "nominal_pressed_voltage_stddev": 0.9243376006633075
+  },
+  "42": {
+    "name": "6",
+    "nominal_unpressed_voltage": 386.6,
+    "nominal_unpressed_voltage_stddev": 2.1908902300206647,
+    "nominal_pressed_voltage": 900.96,
+    "nominal_pressed_voltage_stddev": 2.0684293558156632
+  },
+  "53": {
+    "name": "7",
+    "nominal_unpressed_voltage": 392.04,
+    "nominal_unpressed_voltage_stddev": 2.323445717033217,
+    "nominal_pressed_voltage": 890.92,
+    "nominal_pressed_voltage_stddev": 1.26237870704476
+  },
+  "41": {
+    "name": "8",
+    "nominal_unpressed_voltage": 410.44,
+    "nominal_unpressed_voltage_stddev": 33.72842124974129,
+    "nominal_pressed_voltage": 926.4,
+    "nominal_pressed_voltage_stddev": 4.816637831516917
+  },
+  "52": {
+    "name": "9",
+    "nominal_unpressed_voltage": 387.64,
+    "nominal_unpressed_voltage_stddev": 2.1143320458244017,
+    "nominal_pressed_voltage": 890.28,
+    "nominal_pressed_voltage_stddev": 1.1142710621747294
+  },
+  "40": {
+    "name": "0",
+    "nominal_unpressed_voltage": 379.2,
+    "nominal_unpressed_voltage_stddev": 2.2271057451320084,
+    "nominal_pressed_voltage": 897.12,
+    "nominal_pressed_voltage_stddev": 2.5972292929196676
+  },
+  "68": {
+    "name": "q",
+    "nominal_unpressed_voltage": 355.96,
+    "nominal_unpressed_voltage_stddev": 21.532264163343346,
+    "nominal_pressed_voltage": 885.96,
+    "nominal_pressed_voltage_stddev": 0.8236504112789598
+  },
+  "32": {
+    "name": "w",
+    "nominal_unpressed_voltage": 386.28,
+    "nominal_unpressed_voltage_stddev": 79.32793707137479,
+    "nominal_pressed_voltage": 914,
+    "nominal_pressed_voltage_stddev": 25.43069012040373
+  },
+  "67": {
+    "name": "e",
+    "nominal_unpressed_voltage": 352.24,
+    "nominal_unpressed_voltage_stddev": 21.77389262396597,
+    "nominal_pressed_voltage": 885.96,
+    "nominal_pressed_voltage_stddev": 0.7735631842325484
+  },
+  "31": {
+    "name": "r",
+    "nominal_unpressed_voltage": 377.64,
+    "nominal_unpressed_voltage_stddev": 23.628592848496076,
+    "nominal_pressed_voltage": 896.16,
+    "nominal_pressed_voltage_stddev": 12.321298632855223
+  },
+  "66": {
+    "name": "t",
+    "nominal_unpressed_voltage": 373.4,
+    "nominal_unpressed_voltage_stddev": 2.3151673805580453,
+    "nominal_pressed_voltage": 887.88,
+    "nominal_pressed_voltage_stddev": 0.7652450587883599
+  },
+  "30": {
+    "name": "y",
+    "nominal_unpressed_voltage": 384.64,
+    "nominal_unpressed_voltage_stddev": 19.82902922485113,
+    "nominal_pressed_voltage": 898.2,
+    "nominal_pressed_voltage_stddev": 7.38105683489837
+  },
+  "65": {
+    "name": "u",
+    "nominal_unpressed_voltage": 373.96,
+    "nominal_unpressed_voltage_stddev": 2.489658611135269,
+    "nominal_pressed_voltage": 885.36,
+    "nominal_pressed_voltage_stddev": 1.0150862032359618
+  },
+  "29": {
+    "name": "i",
+    "nominal_unpressed_voltage": 399.28,
+    "nominal_unpressed_voltage_stddev": 58.78946844461174,
+    "nominal_pressed_voltage": 897.92,
+    "nominal_pressed_voltage_stddev": 20.368446185215017
+  },
+  "64": {
+    "name": "o",
+    "nominal_unpressed_voltage": 354.04,
+    "nominal_unpressed_voltage_stddev": 2.4573156085452266,
+    "nominal_pressed_voltage": 886.64,
+    "nominal_pressed_voltage_stddev": 0.8428523002282194
+  },
+  "28": {
+    "name": "p",
+    "nominal_unpressed_voltage": 371.2,
+    "nominal_unpressed_voltage_stddev": 10.972693379476164,
+    "nominal_pressed_voltage": 912.56,
+    "nominal_pressed_voltage_stddev": 10.040239040979055
+  },
+  "80": {
+    "name": "a",
+    "nominal_unpressed_voltage": 87.64,
+    "nominal_unpressed_voltage_stddev": 0.8428523002282192,
+    "nominal_pressed_voltage": 394.56,
+    "nominal_pressed_voltage_stddev": 0.6974238309665078
+  },
+  "20": {
+    "name": "s",
+    "nominal_unpressed_voltage": 371.08,
+    "nominal_unpressed_voltage_stddev": 2.6064535292231845,
+    "nominal_pressed_voltage": 901.2,
+    "nominal_pressed_voltage_stddev": 4.774934554525327
+  },
+  "79": {
+    "name": "d",
+    "nominal_unpressed_voltage": 87.56,
+    "nominal_unpressed_voltage_stddev": 1.0229369482035535,
+    "nominal_pressed_voltage": 395.64,
+    "nominal_pressed_voltage_stddev": 2.62114478806494
+  },
+  "19": {
+    "name": "f",
+    "nominal_unpressed_voltage": 369.2,
+    "nominal_unpressed_voltage_stddev": 2.7276363393971708,
+    "nominal_pressed_voltage": 914.28,
+    "nominal_pressed_voltage_stddev": 10.129244789222934
+  },
+  "78": {
+    "name": "g",
+    "nominal_unpressed_voltage": 91.44,
+    "nominal_unpressed_voltage_stddev": 0.9414881836751855,
+    "nominal_pressed_voltage": 395.4,
+    "nominal_pressed_voltage_stddev": 0.5656854249492379
+  },
+  "18": {
+    "name": "h",
+    "nominal_unpressed_voltage": 458.32,
+    "nominal_unpressed_voltage_stddev": 87.76364623236661,
+    "nominal_pressed_voltage": 944.04,
+    "nominal_pressed_voltage_stddev": 26.851413370621664
+  },
+  "77": {
+    "name": "j",
+    "nominal_unpressed_voltage": 89.08,
+    "nominal_unpressed_voltage_stddev": 0.9346657156438336,
+    "nominal_pressed_voltage": 395.44,
+    "nominal_pressed_voltage_stddev": 0.6374950980203692
+  },
+  "17": {
+    "name": "k",
+    "nominal_unpressed_voltage": 375.36,
+    "nominal_unpressed_voltage_stddev": 2.463818175109519,
+    "nominal_pressed_voltage": 895.2,
+    "nominal_pressed_voltage_stddev": 3.3466401061363027
+  },
+  "76": {
+    "name": "l",
+    "nominal_unpressed_voltage": 89,
+    "nominal_unpressed_voltage_stddev": 0.565685424949238,
+    "nominal_pressed_voltage": 395.32,
+    "nominal_pressed_voltage_stddev": 0.4664761515876242
+  },
+  "92": {
+    "name": "z",
+    "nominal_unpressed_voltage": 309.88,
+    "nominal_unpressed_voltage_stddev": 19.29003888020965,
+    "nominal_pressed_voltage": 889.2,
+    "nominal_pressed_voltage_stddev": 0.8
+  },
+  "7": {
+    "name": "x",
+    "nominal_unpressed_voltage": 362.16,
+    "nominal_unpressed_voltage_stddev": 1.973423421367042,
+    "nominal_pressed_voltage": 904.6,
+    "nominal_pressed_voltage_stddev": 3.0854497241083023
+  },
+  "91": {
+    "name": "c",
+    "nominal_unpressed_voltage": 302.4,
+    "nominal_unpressed_voltage_stddev": 18.965231345807517,
+    "nominal_pressed_voltage": 889.12,
+    "nominal_pressed_voltage_stddev": 5.093682361514115
+  },
+  "6": {
+    "name": "v",
+    "nominal_unpressed_voltage": 364.84,
+    "nominal_unpressed_voltage_stddev": 2.052900387257015,
+    "nominal_pressed_voltage": 908,
+    "nominal_pressed_voltage_stddev": 5.0990195135927845
+  },
+  "90": {
+    "name": "b",
+    "nominal_unpressed_voltage": 310.68,
+    "nominal_unpressed_voltage_stddev": 18.602623470897864,
+    "nominal_pressed_voltage": 891,
+    "nominal_pressed_voltage_stddev": 2.3323807579381204
+  },
+  "5": {
+    "name": "n",
+    "nominal_unpressed_voltage": 363.12,
+    "nominal_unpressed_voltage_stddev": 2.337862271392393,
+    "nominal_pressed_voltage": 908.12,
+    "nominal_pressed_voltage_stddev": 9.471304028485202
+  },
+  "89": {
+    "name": "m",
+    "nominal_unpressed_voltage": 308.44,
+    "nominal_unpressed_voltage_stddev": 2.0214846029589246,
+    "nominal_pressed_voltage": 891.56,
+    "nominal_pressed_voltage_stddev": 0.6374950980203691
+  },
+  "45": {
+    "name": "`",
+    "nominal_unpressed_voltage": 358.36,
+    "nominal_unpressed_voltage_stddev": 2.24285532302019,
+    "nominal_pressed_voltage": 911.44,
+    "nominal_pressed_voltage_stddev": 5.579103870694648
+  },
+  "88": {
+    "name": ".",
+    "nominal_unpressed_voltage": 313.8,
+    "nominal_unpressed_voltage_stddev": 2.280350850198275,
+    "nominal_pressed_voltage": 891.16,
+    "nominal_pressed_voltage_stddev": 0.7838367176906171
+  },
+  "4": {
+    "name": ",",
+    "nominal_unpressed_voltage": 366,
+    "nominal_unpressed_voltage_stddev": 47.72672207474551,
+    "nominal_pressed_voltage": 920.68,
+    "nominal_pressed_voltage_stddev": 12.324674437890845
+  },
+  "15": {
+    "name": "\\",
+    "nominal_unpressed_voltage": 378.28,
+    "nominal_unpressed_voltage_stddev": 2.4252010225958593,
+    "nominal_pressed_voltage": 974.24,
+    "nominal_pressed_voltage_stddev": 1.3350655414622912
+  },
+  "3": {
+    "name": "/",
+    "nominal_unpressed_voltage": 362.48,
+    "nominal_unpressed_voltage_stddev": 2.435077000835908,
+    "nominal_pressed_voltage": 904.88,
+    "nominal_pressed_voltage_stddev": 2.02622802270623
+  },
+  "75": {
+    "name": "'",
+    "nominal_unpressed_voltage": 91.04,
+    "nominal_unpressed_voltage_stddev": 0.9991996797437436,
+    "nominal_pressed_voltage": 473.68,
+    "nominal_pressed_voltage_stddev": 0.4664761515876242
+  },
+  "16": {
+    "name": ";",
+    "nominal_unpressed_voltage": 311.16,
+    "nominal_unpressed_voltage_stddev": 26.372227816398066,
+    "nominal_pressed_voltage": 885.44,
+    "nominal_pressed_voltage_stddev": 10.770626722712102
+  },
+  "63": {
+    "name": "[",
+    "nominal_unpressed_voltage": 365.32,
+    "nominal_unpressed_voltage_stddev": 2.344696142360454,
+    "nominal_pressed_voltage": 879.16,
+    "nominal_pressed_voltage_stddev": 0.9666436778875659
+  },
+  "27": {
+    "name": "]",
+    "nominal_unpressed_voltage": 508.92,
+    "nominal_unpressed_voltage_stddev": 83.04789943159308,
+    "nominal_pressed_voltage": 990.08,
+    "nominal_pressed_voltage_stddev": 25.086920895159693
+  },
+  "51": {
+    "name": "-",
+    "nominal_unpressed_voltage": 397.32,
+    "nominal_unpressed_voltage_stddev": 2.310324652510984,
+    "nominal_pressed_voltage": 422.12,
+    "nominal_pressed_voltage_stddev": 96.18329168831768
+  },
+  "39": {
+    "name": "=",
+    "nominal_unpressed_voltage": 386.32,
+    "nominal_unpressed_voltage_stddev": 28.80238878982089,
+    "nominal_pressed_voltage": 898.76,
+    "nominal_pressed_voltage_stddev": 13.05152864610119
+  }
+}
