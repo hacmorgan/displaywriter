@@ -490,6 +490,7 @@
   },
   "15": {
     "name": "\\",
+    "scancode": 43,
     "nominal_unpressed_voltage": 378.28,
     "nominal_unpressed_voltage_stddev": 2.4252010225958593,
     "nominal_pressed_voltage": 974.24,
