@@ -88,6 +88,14 @@
     "nominal_pressed_voltage_stddev": 0.7838367176906171,
     "voltage_threshold": 800
   },
+  "15": {
+    "name": "return",
+    "nominal_unpressed_voltage": 368.36,
+    "nominal_unpressed_voltage_stddev": 1.9571407716360112,
+    "nominal_pressed_voltage": 917.84,
+    "nominal_pressed_voltage_stddev": 0.7838367176906171,
+    "voltage_threshold": 800
+  },
   "47": {
     "name": "escape",
     "nominal_unpressed_voltage": 275.16,
@@ -488,7 +496,7 @@
     "nominal_pressed_voltage_stddev": 12.324674437890845,
     "voltage_threshold": 800
   },
-  "15": {
+  "38": {
     "name": "\\",
     "scancode": 43,
     "nominal_unpressed_voltage": 378.28,
