@@ -12,6 +12,14 @@ Convert raw signal from arduino into keystrokes.
 """
 
 
+"""
+TODO
+- Use argparse
+- Make --raw stay in the loop (rather than creating a new serial connection every time)
+- Make 
+"""
+
+
 import json
 import sys
 import time
@@ -51,18 +59,25 @@ def read_keyscans(
                 continue
 
 
-def measure_voltages(samples: int = 25) -> tuple[list[int], list[int]]:
+def measure_voltages(samples: int = 25) -> Iterator[tuple[np.ndarray, np.ndarray]]:
     """
-    Measure the voltages of each key over a period of time
+    Measure the voltages of each key over a period of time.
+
+    Yields continuously (returns a generator) to avoid breaking the serial connection
+    when continuous measurements are required.
 
     @param[in] samples How many times to sample the keyboard
     @retval Mean voltage for each key
     @retval Stddev voltage for each key
     """
     voltages = np.zeros((samples, NUM_KEYS), dtype=int)
-    for idx, keyscan in zip(range(samples), read_keyscans()):
+    idx = 0
+    for keyscan in read_keyscans():
         voltages[idx, :] = keyscan
-    return np.mean(voltages, axis=0), np.std(voltages, axis=0)
+        idx += 1
+        if idx == samples:
+            yield np.mean(voltages, axis=0), np.std(voltages, axis=0)
+            idx = 0
 
 
 def detect_likely_keys() -> None:
@@ -72,13 +87,12 @@ def detect_likely_keys() -> None:
     print("Measuring baseline voltages in 3s... don't press any keys!")
     time.sleep(3)
     print("Measuring baseline voltages...")
-    mean_voltages, stddev_voltages = measure_voltages()
+    mean_voltages, stddev_voltages = next(measure_voltages())
     print("Done!")
-    while True:
-        new_mean_voltages, new_stddev_voltages = measure_voltages()
+    for new_mean_voltages, new_stddev_voltages in measure_voltages():
         mean_voltage_diffs = new_mean_voltages - mean_voltages
         for order, idx in zip(range(10), reversed(np.argsort(mean_voltage_diffs))):
-            print(f"{order}th biggest vdiff: {mean_voltage_diffs[idx]} (key index: {idx}, mean voltage: {new_mean_voltages[idx]})")
+            print(f"{order}th biggest vdiff: {mean_voltage_diffs[idx]:.2f} (key index: {idx}, mean voltage: {new_mean_voltages[idx]})")
         print("\n")
     
 
@@ -90,17 +104,16 @@ def calibrate_keyboard(calibration_file = "calibration.json", samples: int = 50)
     print("Calibrating keyboard...", file=sys.stderr)
 
     print("Measuring key voltages unpressed...", file=sys.stderr)
-    mean_voltages, stddev_voltages = measure_voltages()
+    mean_voltages, stddev_voltages = next(measure_voltages())
     for idx in KEYS:
         KEYS[idx]["nominal_unpressed_voltage"] = mean_voltages[idx]
         KEYS[idx]["nominal_unpressed_voltage_stddev"] = stddev_voltages[idx]
 
     print("Measuring key voltages when pressed...", file=sys.stderr)
-    for idx in KEYS:
+    for idx, (mean_voltages, stddev_voltages) in zip(KEYS, measure_voltages()):
         print(f"Measuring {KEYS[idx]['name']} in 3s...")
         time.sleep(3.0)
         print("Measuring now...")
-        mean_voltages, stddev_voltages = measure_voltages()
         KEYS[idx]["nominal_pressed_voltage"] = mean_voltages[idx]
         KEYS[idx]["nominal_pressed_voltage_stddev"] = stddev_voltages[idx]
         print(f"Finished measuring {KEYS[idx]['name']} now...")
@@ -155,7 +168,8 @@ def main() -> int:
     pressed_keys = set()
     
     if "--raw" in sys.argv:
-        print(measure_voltages())
+        for voltage in measure_voltages(samples=1):
+            print(voltage)
         return 0
     
     if "--detect" in sys.argv:
