@@ -27,6 +27,7 @@ import time
 from typing import Iterator, Optional, TextIO
 
 import keyboard
+import matplotlib.pyplot as plt
 import numpy as np
 import serial
 
@@ -39,7 +40,8 @@ NUM_KEYS = 96  # number of values sent by arduino
 """
 Type Aliases
 """
-KeyScan = str
+KeyScan = np.ndarray
+PlotData = list[float]
 
 
 def read_keyscans(
@@ -221,13 +223,58 @@ def print_raw_scan(scan: KeyScan) -> None:
     print()
 
 
-def plot_key_voltages(keys: list[str], measurement_period: float = 3.0) -> None:
+def key_idx_from_name(key_name: str) -> int:
+    """
+    Find key index of key with given name
+    """
+    for idx in KEYS:
+        if KEYS[idx]["name"] == key_name:
+            return idx
+    raise KeyError(f"{key_name} key not found")
+
+
+def timestamp_generator(end_time: float) -> Iterator[float]:
+    """
+    Infinitely generate timestamps (handy for zipping)
+    """
+    while timestamp := time.time() < end_time:
+        yield timestamp
+
+
+def pyplot_args(timestamps: PlotData, voltages: dict[int, PlotData]) -> list[PlotData]:
+    """
+    Return a flattened list of [timestamps, key_a, timestamps, key_b, ...] for unpacking
+    as arguments to plt.plot()
+    """
+    args = []
+    for key in voltages:
+        args.append(timestamps)
+        args.append(voltages[key])
+    return args
+
+
+def plot_key_voltages(
+    keys: list[str], device: str, measurement_period: float = 3.0
+) -> None:
     """
     Plot voltages on specified keys over a given period of time.
 
     @param[in] keys List of keys to plot
-    @param[in] measurement_period How long to collect measurements for before plotting (seconds).
+    @param[in] measurement_period How long to collect measurements for before plotting
+               (seconds).
     """
+    keys = [key_idx_from_name(key_name) for key_name in keys]
+    timestamps = []
+    voltages = {key: [] for key in keys}
+    for scan, timestamp in zip(
+        read_keyscans(device=device),
+        timestamp_generator(end_time=time.time() + measurement_period),
+    ):
+        timestamps.append(timestamp)
+        for key in keys:
+            voltages[key].append(scan[key])
+    plt.plot(*pyplot_args(timestamps, voltages))
+    plt.show()
 
 
 def load_key_calibration(cal_fd: TextIO) -> None:
@@ -281,6 +328,12 @@ def get_args() -> argparse.Namespace:
         help="Print registered keypresses rather than sending them to the OS.",
     )
     parser.add_argument(
+        "--plot-keys",
+        "-p",
+        type=str,
+        help="Plot voltages over 3 seconds for each key (as comma-separated string)",
+    )
+    parser.add_argument(
         "--raw",
         "-r",
         action="store_true",
@@ -302,6 +355,13 @@ def main(args: argparse.Namespace) -> int:
 
     if args.detect:
         print(detect_likely_keys())
+        return 0
+
+    if args.plot_keys is not None:
+        while True:
+            plot_key_voltages(
+                keys=args.plot_keys.strip().split(","), device=args.device
+            )
         return 0
 
     if args.calibrate:

@@ -83,11 +83,11 @@
     "name": "right",
     "voltage_threshold": 500
   },
-  "10": {
+  "22": {
     "name": "delete",
     "voltage_threshold": 500
   },
-  "22": {
+  "10": {
     "name": "insert",
     "voltage_threshold": 500
   },
@@ -166,7 +166,7 @@
   "17": {
     "name": "t",
     "max_confidence": 5,
-    "voltage_threshold": 510
+    "voltage_threshold": 520
   },
   "77": {
     "name": "y",
