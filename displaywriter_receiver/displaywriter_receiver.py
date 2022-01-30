@@ -60,9 +60,9 @@ def read_keyscans(
             if len(voltage_bytestrings) != NUM_KEYS:
                 continue
             try:
-                scan = np.array([float(voltage) for voltage in voltage_bytestrings])
-                ewme_scan = (1 - ewme_ratios) * ewme_scan + ewme_ratios * scan
-                yield ewme_scan
+                scan = np.array([int(voltage) for voltage in voltage_bytestrings])
+                # ewme_scan = (1 - ewme_ratios) * ewme_scan + ewme_ratios * scan
+                yield scan
             except ValueError:
                 continue
 

@@ -3,12 +3,11 @@
     "ewme_ratio": 1.00
   },
   "38": {
-    "name": "left_alt",
-    "ewme_ratio": 0.45,
+    "name": "left alt",
     "voltage_threshold": 500
   },
   "44": {
-    "name": "right_alt",
+    "name": "right alt",
     "voltage_threshold": 500
   },
   "37": {
@@ -118,7 +117,6 @@
   },
   "4": {
     "name": "3",
-    "ewme_ratio": 0.4,
     "voltage_threshold": 440
   },
   "88": {
@@ -177,7 +175,7 @@
   "18": {
     "name": "u",
     "max_confidence": 5,
-    "voltage_threshold": 600
+    "voltage_threshold": 550
   },
   "78": {
     "name": "i",
@@ -193,7 +191,6 @@
   },
   "27": {
     "name": "a",
-    "ewme_ratio": 0.4,
     "voltage_threshold": 480
   },
   "63": {
@@ -238,7 +235,7 @@
   },
   "40": {
     "name": "c",
-    "voltage_threshold": 600
+    "voltage_threshold": 550
   },
   "53": {
     "name": "v",
