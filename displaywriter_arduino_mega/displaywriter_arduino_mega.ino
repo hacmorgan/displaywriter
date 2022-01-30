@@ -15,7 +15,7 @@ const byte COL_PIN[] = {22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44};
 // Key states
 int key_state[ROWS][COLUMNS];
 float voltage;
-bool analog_read = false;
+bool analog_read = true;
 
 // Size of data to be sent
 int message_size = 129;  // according to python 
@@ -48,7 +48,9 @@ void scan_keyboard(bool analog_read = false)
 {
   for (int row = 0; row < ROWS; row++) {
     for (int col = 0; col < COLUMNS; col++) {
-      pulse_pin(COL_PIN[col]);
+      digitalWrite(COL_PIN[col], HIGH);
+      digitalWrite(COL_PIN[col], LOW);
+      /* pulse_pin(COL_PIN[col]); */
       if (analog_read) {
           key_state[row][col] = analogRead(ROW_PIN[row]);
       } else {
@@ -89,9 +91,7 @@ void send_scan_to_pc(bool analog_read=true)
   for (int row = 0; row < ROWS; row++) {
     for (int col = 0; col < COLUMNS; col++) {
         Serial.print(key_state[row][col]);
-        if (analog_read) {
-          Serial.print(",");
-        }
+        Serial.print(",");
     }
   }
   Serial.println();
@@ -108,6 +108,6 @@ void setup()
 void loop()
 {
   /* while (Serial.availableForWrite() < message_size) { ; } */
-  scan_keyboard(analog_read=true);
-  send_scan_to_pc(analog_read=true);
+  scan_keyboard(analog_read=analog_read);
+  send_scan_to_pc(analog_read=analog_read);
 }

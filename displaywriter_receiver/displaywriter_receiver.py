@@ -14,31 +14,31 @@ Convert raw signal from arduino into keystrokes.
 
 """
 TODO
-- Use argparse
 ? Checksum for messages
 ? Make a feedforward network to watch voltages after initial press to avoid multiple presses
 """
 
 
+import argparse
 import json
 import sys
 import time
 
-from typing import Iterator, Optional
+from typing import Iterator, Optional, TextIO
 
 import keyboard
 import numpy as np
 import serial
 
 
-"""
-Position indices of each key's character in the string received from the arduino.
-"""
 GLOBAL_CONFIG = {}
 KEYS = {}  # filled in from calibration file
-NUM_KEYS = 96;  # number of values sent by arduino
+NUM_KEYS = 96  # number of values sent by arduino
 
 
+"""
+Type Aliases
+"""
 KeyScan = str
 
 
@@ -50,12 +50,10 @@ def read_keyscans(
     Read keyscans from arduino over serial.
     """
     ewme_scan = np.zeros(NUM_KEYS, dtype=float)
-    ewme_ratios = np.zeros(NUM_KEYS, dtype=float)
+    ewme_ratios = np.ones(NUM_KEYS, dtype=float) * GLOBAL_CONFIG["ewme_ratio"]
     for idx in KEYS:
         if "ewme_ratio" in KEYS[idx]:
             ewme_ratios[idx] = KEYS[idx]["ewme_ratio"]
-        else:
-            ewme_ratios[idx] = GLOBAL_CONFIG["ewme_ratio"]
     with serial.Serial(port=device, baudrate=baudrate, timeout=1.0) as ser:
         while True:
             voltage_bytestrings = ser.readline().strip().split(b",")[:-1]
@@ -91,24 +89,28 @@ def measure_voltages(samples: int = 25) -> Iterator[tuple[np.ndarray, np.ndarray
 
 
 def detect_likely_keys() -> None:
-    """
-    
-    """
+    """ """
     print("Measuring baseline voltages...")
     mean_voltages, stddev_voltages = next(measure_voltages())
     print("Done!")
     for new_mean_voltages, new_stddev_voltages in measure_voltages():
         mean_voltage_diffs = new_mean_voltages - mean_voltages
-        mean_voltage_diffs_percent = (new_mean_voltages - mean_voltages) / (mean_voltages + 0.1) * 100
-        for metric, symbol in ((mean_voltage_diffs, "/1023*5V"), (mean_voltage_diffs_percent, "%")):
+        mean_voltage_diffs_percent = (
+            (new_mean_voltages - mean_voltages) / (mean_voltages + 0.1) * 100
+        )
+        for metric, symbol in (
+            (mean_voltage_diffs, "/1023*5V"),
+            (mean_voltage_diffs_percent, "%"),
+        ):
             for order, idx in zip(range(10), reversed(np.argsort(metric))):
-                print(f"{order}th biggest vdiff ({symbol}): {metric[idx]:.2f}({symbol}) (key index: {idx}, mean voltage: {new_mean_voltages[idx]})")
+                print(
+                    f"{order}th biggest vdiff ({symbol}): {metric[idx]:.2f}({symbol}) (key index: {idx}, mean voltage: {new_mean_voltages[idx]})"
+                )
             print()
         print("\n")
-    
 
-            
-def calibrate_keyboard(calibration_file = "calibration.json", samples: int = 50):
+
+def calibrate_keyboard(calibration_file="calibration.json", samples: int = 50):
     """
     Read the keyboard for a while to determine expected voltages on each key.
     """
@@ -142,38 +144,36 @@ def key_pressed(voltage: int, idx: int) -> bool:
     """
     if "voltage_threshold" in KEYS[idx]:
         return voltage > KEYS[idx]["voltage_threshold"]
-    return abs(voltage - KEYS[idx]["nominal_unpressed_voltage"]) > abs(voltage - KEYS[idx]["nominal_pressed_voltage"])
+    return abs(voltage - KEYS[idx]["nominal_unpressed_voltage"]) > abs(
+        voltage - KEYS[idx]["nominal_pressed_voltage"]
+    )
 
 
-def increment_confidence(idx: int) -> None:
-    """
-    """
+def increment_confidence(idx: int, max_confidence: int) -> None:
+    """ """
     if "confidence" not in KEYS[idx]:
         KEYS[idx]["confidence"] = 0
-    KEYS[idx]["confidence"] += 1
+    KEYS[idx]["confidence"] = min(max_confidence, KEYS[idx]["confidence"] + 1)
 
 
 def decrement_confidence(idx: int) -> None:
-    """
-    """
-    KEYS[idx]["confidence"] -= 1
-    
+    """ """
+    KEYS[idx]["confidence"] = max(KEYS[idx]["confidence"] - 1, 0)
+
 
 def press_key(idx: int, voltage: int, dry_run: bool) -> None:
-    """
-    """
+    """ """
     if dry_run:
         print(f"Pressing: {KEYS[idx]} (measured voltage: {voltage})")
     else:
         key = KEYS[idx]["scancode"] if "scancode" in KEYS[idx] else KEYS[idx]["name"]
         if "press_and_release" in KEYS[idx] and KEYS[idx]["press_and_release"]:
-            keyboard.press_and_release(key)                    
+            keyboard.press_and_release(key)
         keyboard.press(key)
-    
+
 
 def release_key(idx: int, dry_run: bool) -> None:
-    """
-    """
+    """ """
     if dry_run:
         print(f"Releasing: {KEYS[idx]}")
     else:
@@ -181,62 +181,140 @@ def release_key(idx: int, dry_run: bool) -> None:
         keyboard.release(key)
 
 
-def press_keys(keyscan: KeyScan, pressed_keys: set, dry_run: bool = False, confidence: int = 1) -> None:
+def press_keys(
+    keyscan: KeyScan, pressed_keys: set, dry_run: bool = False, max_confidence: int = 2
+) -> None:
     """
     Press/release keys as appropriate.
     """
     for idx, voltage in enumerate(keyscan):
         if idx in KEYS:
-            if idx not in pressed_keys and key_pressed(voltage, idx):
-                increment_confidence(idx)
-                if KEYS[idx]["confidence"] >= confidence:
+            if idx in pressed_keys:
+                if key_pressed(voltage, idx):
+                    increment_confidence(idx, max_confidence)
+                else:
+                    decrement_confidence(idx)
+                    if KEYS[idx]["confidence"] == 0:
+                        release_key(idx, dry_run)
+                        pressed_keys.remove(idx)
+            else:
+                if key_pressed(voltage, idx):
                     press_key(idx, voltage, dry_run)
                     pressed_keys.add(idx)
-            elif idx in pressed_keys and not key_pressed(voltage, idx):
-                decrement_confidence(idx)
-                if KEYS[idx]["confidence"] == 0:
-                    release_key(idx, dry_run)
-                    pressed_keys.remove(idx)
+                    KEYS[idx]["confidence"] = (
+                        KEYS[idx]["max_confidence"]
+                        if "max_confidence" in KEYS[idx]
+                        else max_confidence
+                    )
 
 
-def check_dry_run() -> bool:
+def print_raw_scan(scan: KeyScan) -> None:
     """
-    Check if --dry-run given as arg
+    Print raw voltages of scan.
+
+    Values are printed with 4 digits to ensure consisent width.
+
+    @param[in] scan Keyboard scan.
     """
-    return any(dryrun in sys.argv for dryrun in ("--dry-run", "-d"))
-                
+    for row in scan.reshape(8, 12).astype(int):
+        print(",".join(f"{num:4d}" for num in row))
+    print()
 
-def main() -> int:
-    
-    pressed_keys = set()
-    
-    with open("/home/hamish/src/displaywriter/calibration.json", "r") as cal_file:
-        for field, cfg in json.load(cal_file).items():
-            if field == "global":
-                GLOBAL_CONFIG.update(cfg)
-            else:
-                KEYS[int(field)] = cfg
 
-    if "--raw" in sys.argv:
-        for scan in read_keyscans():
-            # print(",".join(f"{val:.1f}" for val in scan))
-            print(scan.reshape(8, 12).astype(int))
+def plot_key_voltages(keys: list[str], measurement_period: float = 3.0) -> None:
+    """
+    Plot voltages on specified keys over a given period of time.
+
+    @param[in] keys List of keys to plot
+    @param[in] measurement_period How long to collect measurements for before plotting (seconds).
+    """
+
+
+def load_key_calibration(cal_fd: TextIO) -> None:
+    """
+    Load key calibration from file.
+
+    @param[in] cal_fd File descriptor of open calibration file.
+    """
+    for field, cfg in json.load(cal_fd).items():
+        if field == "global":
+            GLOBAL_CONFIG.update(cfg)
+        else:
+            KEYS[int(field)] = cfg
+
+
+def get_args() -> argparse.Namespace:
+    """
+    Define and parse args
+    """
+    parser = argparse.ArgumentParser(prog="DisplayWriter Receiver")
+    parser.add_argument(
+        "--calibrate",
+        action="store_true",
+        help="Auto-calibrate the keyboard (TODO)",
+    )
+    parser.add_argument(
+        "--calibration",
+        "-c",
+        type=str,
+        help="Keyboard calibration file.",
+        default="/home/hamish/src/displaywriter/calibration.json",
+    )
+    parser.add_argument(
+        "--detect",
+        "-e",
+        action="store_true",
+        help="Measure baseline voltages (with keys unpressed). Then report 10 keys with "
+        "highest voltage diff relative to baselines.",
+    )
+    parser.add_argument(
+        "--device",
+        "-v",
+        type=str,
+        default="/dev/ttyACM0",
+        help="Serial device of arduino.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        "-d",
+        action="store_true",
+        help="Print registered keypresses rather than sending them to the OS.",
+    )
+    parser.add_argument(
+        "--raw",
+        "-r",
+        action="store_true",
+        help="Print raw key voltages from arduino. Exponential weighted moving average "
+        "is applied before printing.",
+    )
+    return parser.parse_args()
+
+
+def main(args: argparse.Namespace) -> int:
+
+    with open(args.calibration, "r") as cal_fd:
+        load_key_calibration(cal_fd)
+
+    if args.raw:
+        for scan in read_keyscans(device=args.device):
+            print_raw_scan(scan)
         return 0
-    
-    if "--detect" in sys.argv:
+
+    if args.detect:
         print(detect_likely_keys())
         return 0
-    
-    if "--calibrate" in sys.argv:
+
+    if args.calibrate:
         calibrate_keyboard()
-        with open("/home/hamish/src/displaywriter/calibration.json", "w") as cal_file:
+        with open(args.calibration, "w") as cal_file:
             json.dump(KEYS, cal_file)
 
-    for keyscan in read_keyscans():
-        press_keys(keyscan, pressed_keys, check_dry_run())
+    pressed_keys = set()
+    for keyscan in read_keyscans(device=args.device):
+        press_keys(keyscan, pressed_keys, args.dry_run)
 
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(get_args()))
