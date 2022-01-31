@@ -252,7 +252,7 @@
   },
   "41": {
     "name": "b",
-    "voltage_threshold": 550
+    "voltage_threshold": 580
   },
   "54": {
     "name": "n",
