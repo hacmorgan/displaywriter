@@ -236,7 +236,7 @@
   },
   "39": {
     "name": "z",
-    "voltage_threshold": 560
+    "voltage_threshold": 580
   },
   "52": {
     "name": "x",
