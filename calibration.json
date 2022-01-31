@@ -19,7 +19,7 @@
     "voltage_threshold": 500
   },
   "51": {
-    "name": "left shift",
+    "name": "left ctrl",
     "voltage_threshold": 500
   },
   "57": {
@@ -39,12 +39,20 @@
     "name": "left ctrl",
     "voltage_threshold": 500
   },
-  "47": {
-    "name": "right ctrl",
+  "24": {
+    "name": "left windows",
+    "voltage_threshold": 500
+  },
+  "25": {
+    "name": "left windows",
     "voltage_threshold": 500
   },
   "59": {
     "name": "right ctrl",
+    "voltage_threshold": 500
+  },
+  "71": {
+    "name": "right windows",
     "voltage_threshold": 500
   },
   "74": {
@@ -60,19 +68,16 @@
     "voltage_threshold": 500
   },
   "68": {
-    "name": "return",
+    "name": "\\",
+    "scancode": 43,
     "voltage_threshold": 500
   },
   "84": {
     "name": "escape",
     "voltage_threshold": 500
   },
-  "34": {
-    "name": "up",
-    "voltage_threshold": 650
-  },
   "70": {
-    "name": "down",
+    "name": "up",
     "voltage_threshold": 500
   },
   "46": {
@@ -80,6 +85,10 @@
     "voltage_threshold": 500
   },
   "58": {
+    "name": "down",
+    "voltage_threshold": 500
+  },
+  "47": {
     "name": "right",
     "voltage_threshold": 500
   },
@@ -117,7 +126,7 @@
   },
   "4": {
     "name": "3",
-    "voltage_threshold": 440
+    "voltage_threshold": 500
   },
   "88": {
     "name": "4",
@@ -227,7 +236,7 @@
   },
   "39": {
     "name": "z",
-    "voltage_threshold": 700
+    "voltage_threshold": 560
   },
   "52": {
     "name": "x",
@@ -243,11 +252,11 @@
   },
   "41": {
     "name": "b",
-    "voltage_threshold": 580
+    "voltage_threshold": 550
   },
   "54": {
     "name": "n",
-    "voltage_threshold": 500
+    "voltage_threshold": 450
   },
   "42": {
     "name": "m",
@@ -266,8 +275,7 @@
     "voltage_threshold": 500
   },
   "93": {
-    "name": "\\",
-    "scancode": 43,
+    "name": "right ctrl",
     "voltage_threshold": 500
   },
   "56": {
