@@ -76,6 +76,10 @@
     "name": "escape",
     "voltage_threshold": 500
   },
+  "85": {
+    "name": "escape",
+    "voltage_threshold": 500
+  },
   "70": {
     "name": "up",
     "voltage_threshold": 500
