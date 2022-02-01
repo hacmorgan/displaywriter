@@ -114,7 +114,7 @@
   },
   "23": {
     "name": "page down",
-    "voltage_threshold": 500
+    "voltage_threshold": 200
   },
   "3": {
     "name": "1",
