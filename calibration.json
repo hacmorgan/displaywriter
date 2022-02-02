@@ -134,7 +134,7 @@
   },
   "88": {
     "name": "4",
-    "voltage_threshold": 500
+    "voltage_threshold": 550
   },
   "5": {
     "name": "5",
@@ -179,7 +179,7 @@
   "17": {
     "name": "t",
     "max_confidence": 5,
-    "voltage_threshold": 520
+    "voltage_threshold": 550
   },
   "77": {
     "name": "y",
@@ -240,7 +240,7 @@
   },
   "39": {
     "name": "z",
-    "voltage_threshold": 580
+    "voltage_threshold": 585
   },
   "52": {
     "name": "x",
@@ -312,6 +312,6 @@
   },
   "92": {
     "name": "=",
-    "voltage_threshold": 500
+    "voltage_threshold": 550
   }
 }
