@@ -1,6 +1,10 @@
 /**
  * Scan the keyboard pin by pin.
  *
+ * Uses a digital output pin for each column of the keyboard matrix, and an analog input pin for each row. For each key, the arduino pulses the column and reads the analog voltage on the row.
+ *
+ * This means that, at least for the 8-row displaywriter keyboard, an Arduino Mega is required.
+ *
  * @author  Hamish Morgan
  * @date    16/01/2021
  * @license BSD
@@ -20,7 +24,7 @@ bool analog_read = true;
 // Size of data to be sent
 int message_size = 129;  // according to python
 
-// defines for setting and clearing register bits
+// #defines for setting and clearing register bits
 #ifndef cbi
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
 #endif
@@ -32,10 +36,10 @@ int message_size = 129;  // according to python
 void set_analog_read_speed()
 {
   /**
-   * Set ADC prescale to 32 -> speeds up analogRead
+   * Set ADC prescale to speeds up analogRead
    *
    * The ADC prescale sets the division ratio of the system clock to the ADC.
-   * Smaller values read faster but less accurately. The default is 128
+   * Smaller values read faster but less accurately. The default (and maximum) is 128.
    *
    * We do this by setting the 3 bits of ADPS. The ADC prescale is given by 2**ADPS,
    * so ADPS = 0b101 -> 2**5 == 32
