@@ -18,7 +18,32 @@ float voltage;
 bool analog_read = true;
 
 // Size of data to be sent
-int message_size = 129;  // according to python 
+int message_size = 129;  // according to python
+
+// defines for setting and clearing register bits
+#ifndef cbi
+#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
+#endif
+#ifndef sbi
+#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
+#endif
+
+
+void set_analog_read_speed()
+{
+  /**
+   * Set ADC prescale to 32 -> speeds up analogRead
+   *
+   * The ADC prescale sets the division ratio of the system clock to the ADC.
+   * Smaller values read faster but less accurately. The default is 128
+   *
+   * We do this by setting the 3 bits of ADPS. The ADC prescale is given by 2**ADPS,
+   * so ADPS = 0b101 -> 2**5 == 32
+   */
+  sbi(ADCSRA, ADPS2);
+  cbi(ADCSRA, ADPS1);
+  sbi(ADCSRA, ADPS0);
+}
 
 
 void setup_pins()
@@ -26,6 +51,8 @@ void setup_pins()
   /**
    * Configure the pins
    */
+  set_analog_read_speed();
+  
   for (int i = 0; i < COLUMNS; i++) {
     pinMode(COL_PIN[i], OUTPUT);
     digitalWrite(COL_PIN[i], LOW);  // todo: change to high
