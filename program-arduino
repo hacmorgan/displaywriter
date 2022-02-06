@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+project=displaywriter_arduino_mega; port=/dev/ttyACM0; board="arduino:avr:mega";
+arduino-cli compile --fqbn "arduino:avr:mega" "displaywriter_arduino_mega" &&
+arduino-cli upload -p /dev/ttyACM0 --fqbn "arduino:avr:mega" -v "displaywriter_arduino_mega"

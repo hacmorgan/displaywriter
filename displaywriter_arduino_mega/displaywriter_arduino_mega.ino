@@ -15,6 +15,7 @@
 
 /* In debug mode, send raw key voltages to host machine rather than pressed/released key
    index. This is required for some debugging modes of the receiver. */
+/* bool DEBUG_MODE = true; */
 bool DEBUG_MODE = false;
 
 
@@ -35,13 +36,14 @@ const byte nonexistent_keys[] = {  // Not all columns have 8 keys, these indices
   81
 };
 const int num_nonexistent_keys = sizeof(nonexistent_keys) / sizeof(nonexistent_keys[0]);
-bool key_state[ROWS][COLUMNS];  // Stores whether each key is currently pressed
+byte debounce_time = 5;  // How many consecutive redings below threshold before a key is considered released.
+byte key_state[ROWS][COLUMNS];  // Stores whether each key is currently pressed
 int key_voltage[ROWS][COLUMNS];  // Stores an analog scan of the keyboard
 bool key_exists[ROWS][COLUMNS];  // Quickly check whether a given key index actually exists.
 
 
 // Key detection
-const int default_voltage_threshold = 200;  // A key that measures above this voltage is considered pressed
+const int default_voltage_threshold = 20;  // A key that measures above this voltage is considered pressed
 const int special_voltage_thresholds[][2] = {
   { 0, 600},
   {50, 120},
@@ -171,7 +173,7 @@ void clear_key_state()
    */
   for (byte row = 0; row < ROWS; row++) {
     for (byte col = 0; col < COLUMNS; col++) {
-      key_state[row][col] = false;
+      key_state[row][col] = 0;
     }
   }
 }
@@ -199,9 +201,7 @@ void scan_keyboard()
   {
     for (int col = 0; col < COLUMNS; col++)
     {
-      /* pulse_column(col); */
-      digitalWrite(COL_PIN[col], HIGH);
-      digitalWrite(COL_PIN[col], LOW);
+      pulse_column(col);
       key_voltage[row][col] = analogRead(ROW_PIN[row]);
     }
   }
@@ -225,14 +225,17 @@ void send_scan_to_host()
         if (!key_exists[row][col]) {
           continue;
         }
-        if (! key_state[row][col] && key_voltage[row][col] > voltage_threshold[row][col]) {
-          key_state[row][col] = true;
+        if (key_state[row][col] == 0 && key_voltage[row][col] > voltage_threshold[row][col]) {
+          key_state[row][col] = debounce_time;
           Serial.print(row * COLUMNS + col);  // key index
           Serial.println(",1");  // 1 -> pressed
-        } else if (key_state[row][col] && key_voltage[row][col] < voltage_threshold[row][col]) {
-          key_state[row][col] = false;
-          Serial.print(row * COLUMNS + col);  // key index
-          Serial.println(",0");  // 0 -> unpressed
+        } else if (key_state[row][col] > 0 && key_voltage[row][col] < voltage_threshold[row][col]) {
+          key_state[row][col]--;
+          if (key_state[row][col] <= 0) {
+            key_state[row][col] = 0;
+            Serial.print(row * COLUMNS + col);  // key index
+            Serial.println(",0");  // 0 -> unpressed
+          }
         }
       }
     }

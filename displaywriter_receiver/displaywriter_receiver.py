@@ -101,11 +101,6 @@ def read_keyscans(
     @param[in] baudrate Baudrate for serial communication
     @return Generator of keyscans.
     """
-    ewme_scan = np.zeros(NUM_KEYS, dtype=float)
-    ewme_ratios = np.ones(NUM_KEYS, dtype=float) * GLOBAL_CONFIG["ewme_ratio"]
-    for idx in KEYS:
-        if "ewme_ratio" in KEYS[idx]:
-            ewme_ratios[idx] = KEYS[idx]["ewme_ratio"]
     with serial.Serial(port=device, baudrate=baudrate, timeout=1.0) as ser:
         while True:
             voltage_bytestrings = ser.readline().strip().split(b",")[:-1]
@@ -113,7 +108,6 @@ def read_keyscans(
                 continue
             try:
                 scan = np.array([int(voltage) for voltage in voltage_bytestrings])
-                # ewme_scan = (1 - ewme_ratios) * ewme_scan + ewme_ratios * scan
                 yield scan
             except ValueError:
                 continue
