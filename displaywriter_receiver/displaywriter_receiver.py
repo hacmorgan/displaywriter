@@ -4,7 +4,17 @@
 """
 @file
 
-Convert raw signal from arduino into keystrokes.
+Read messages from Arduino and generate keypresses or debug information.
+
+The Arduino can either send full analog scans of the keyboard (when it is in debug mode),
+or just which key has been pressed or released (when it is in normal mode).
+
+Some debugging operations (e.g. --raw, --detect) require the Arduino to be in debug mode,
+but normal operation expects it to be in normal mode.
+
+Originally this program would detect which key is pressed from analog scans of the
+keyboard, but that requires constant serial communincation with the Arduino, which is
+inefficient, and requires about 5% of one CPU's time at all times for smooth operation.
 
 @author  Hamish Morgan
 @date    20/01/2021
@@ -12,15 +22,9 @@ Convert raw signal from arduino into keystrokes.
 """
 
 
-"""
-TODO
-? Checksum for messages
-? Make a feedforward network to watch voltages after initial press to avoid multiple presses
-"""
-
-
 import argparse
 import json
+import os
 import sys
 import time
 
@@ -36,6 +40,10 @@ GLOBAL_CONFIG = {}
 KEYS = {}  # filled in from calibration file
 NUM_KEYS = 96  # number of values sent by arduino
 
+# Aliases for decoding messages from Arduino
+KEY_PRESSED_STATE = 1
+KEY_RELEASED_STATE = 0
+
 
 """
 Type Aliases
@@ -44,12 +52,54 @@ KeyScan = np.ndarray
 PlotData = list[float]
 
 
+def load_key_calibration(cal_fd: TextIO) -> None:
+    """
+    Load key calibration from file.
+
+    @param[in] cal_fd File descriptor of open calibration file.
+    """
+    for field, cfg in json.load(cal_fd).items():
+        if field == "global":
+            GLOBAL_CONFIG.update(cfg)
+        else:
+            KEYS[int(field)] = cfg
+
+
+def set_niceness(niceness: int = -10) -> bool:
+    """
+    Try to set the niceness of the receiver lower.
+
+    We want to increase the priority of the receiever for the OS, to maximise
+    responsiveness when the PC is under load.
+
+    This will only work on *nix, and requires the receiver to be run by root to allow
+    the niceness to be reduced (priority increased).
+
+    @param[in] niceness New niceness value (should be -ve for higher priority)
+    @return True if niceness set successfully, False otherwise.
+    """
+    if os.name == "posix":
+        try:
+            os.nice(niceness)
+            return True
+        except OSError:
+            pass
+    return False
+    
+
+
 def read_keyscans(
-    device: str = "/dev/ttyACM0",
-    baudrate: int = 115200,
+    device: str,
+    baudrate: int,
 ) -> Iterator[KeyScan]:
     """
-    Read keyscans from arduino over serial.
+    Read keyscans (voltage of each key) from arduino over serial.
+
+    The Arduino must be in debug mode.
+
+    @param[in] device Serial device of Arduino (e.g. /dev/ttyACM0 - *nix, COM3 - windows)
+    @param[in] baudrate Baudrate for serial communication
+    @return Generator of keyscans.
     """
     ewme_scan = np.zeros(NUM_KEYS, dtype=float)
     ewme_ratios = np.ones(NUM_KEYS, dtype=float) * GLOBAL_CONFIG["ewme_ratio"]
@@ -67,6 +117,19 @@ def read_keyscans(
                 yield scan
             except ValueError:
                 continue
+
+
+def print_raw_scan(scan: KeyScan) -> None:
+    """
+    Print raw voltages of scan.
+
+    Values are printed with 4 digits to ensure consisent width.
+
+    @param[in] scan Keyboard scan.
+    """
+    for row in scan.reshape(8, 12).astype(int):
+        print(",".join(f"{num:4d}" for num in row))
+    print()
 
 
 def measure_voltages(samples: int = 25) -> Iterator[tuple[np.ndarray, np.ndarray]]:
@@ -91,7 +154,14 @@ def measure_voltages(samples: int = 25) -> Iterator[tuple[np.ndarray, np.ndarray
 
 
 def detect_likely_keys() -> None:
-    """ """
+    """
+    Detect keys that might be pressed.
+
+    This is achieved by measuring baseline (unpressed) key voltages, then using those
+    expected values to find keys with the biggest deviation from their expected voltage.
+
+    Requires Arduino to be in debug mode.
+    """
     print("Measuring baseline voltages...")
     mean_voltages, stddev_voltages = next(measure_voltages())
     print("Done!")
@@ -112,61 +182,17 @@ def detect_likely_keys() -> None:
         print("\n")
 
 
-def calibrate_keyboard(calibration_file="calibration.json", samples: int = 50):
+def press_key(idx: int, dry_run: bool) -> None:
     """
-    Read the keyboard for a while to determine expected voltages on each key.
+    Press key with given index, or just pretend to.
+
+    @param[in] idx Index of key.
+    @param[in] dry_run Print a message to stdout instead of actually pressing key if True
     """
-    print("Calibrating keyboard...", file=sys.stderr)
-
-    print("Measuring key voltages unpressed...", file=sys.stderr)
-    mean_voltages, stddev_voltages = next(measure_voltages())
-    for idx in KEYS:
-        KEYS[idx]["nominal_unpressed_voltage"] = mean_voltages[idx]
-        KEYS[idx]["nominal_unpressed_voltage_stddev"] = stddev_voltages[idx]
-
-    print("Measuring key voltages when pressed...", file=sys.stderr)
-    voltage_reader = measure_voltages()
-    for idx in KEYS:
-        print(f"Measuring {KEYS[idx]['name']} in 4s...")
-        time.sleep(4.0)
-        print("Measuring now...")
-        mean_voltages, stddev_voltages = next(voltage_reader)
-        KEYS[idx]["nominal_pressed_voltage"] = mean_voltages[idx]
-        KEYS[idx]["nominal_pressed_voltage_stddev"] = stddev_voltages[idx]
-        print(f"Finished measuring {KEYS[idx]['name']} now...")
-
-    print(f"Calibration complete! Writing to file: {calibration_file}", file=sys.stderr)
-    with open(calibration_file, "w") as cal_file:
-        json.dump(KEYS, cal_file)
-
-
-def key_pressed(voltage: int, idx: int) -> bool:
-    """
-    Return True if key is pressed, False otherwise
-    """
-    if "voltage_threshold" in KEYS[idx]:
-        return voltage > KEYS[idx]["voltage_threshold"]
-    return abs(voltage - KEYS[idx]["nominal_unpressed_voltage"]) > abs(
-        voltage - KEYS[idx]["nominal_pressed_voltage"]
-    )
-
-
-def increment_confidence(idx: int, max_confidence: int) -> None:
-    """ """
-    if "confidence" not in KEYS[idx]:
-        KEYS[idx]["confidence"] = 0
-    KEYS[idx]["confidence"] = min(max_confidence, KEYS[idx]["confidence"] + 1)
-
-
-def decrement_confidence(idx: int) -> None:
-    """ """
-    KEYS[idx]["confidence"] = max(KEYS[idx]["confidence"] - 1, 0)
-
-
-def press_key(idx: int, voltage: int, dry_run: bool) -> None:
-    """ """
+    if idx not in KEYS:
+        return
     if dry_run:
-        print(f"Pressing: {KEYS[idx]} (measured voltage: {voltage})")
+        print(f"Pressing: {KEYS[idx]}")
     else:
         key = KEYS[idx]["scancode"] if "scancode" in KEYS[idx] else KEYS[idx]["name"]
         if "press_and_release" in KEYS[idx] and KEYS[idx]["press_and_release"]:
@@ -175,7 +201,14 @@ def press_key(idx: int, voltage: int, dry_run: bool) -> None:
 
 
 def release_key(idx: int, dry_run: bool) -> None:
-    """ """
+    """
+    Release key with given index, or just pretend to.
+
+    @param[in] idx Index of key.
+    @param[in] dry_run Print a message to stdout instead of actually pressing key if True
+    """
+    if idx not in KEYS:
+        return
     if dry_run:
         print(f"Releasing: {KEYS[idx]}")
     else:
@@ -183,44 +216,30 @@ def release_key(idx: int, dry_run: bool) -> None:
         keyboard.release(key)
 
 
-def press_keys(
-    keyscan: KeyScan, pressed_keys: set, dry_run: bool = False, max_confidence: int = 2
-) -> None:
+def read_messages(
+    device: str,
+    baudrate: int,
+    dry_run: bool,
+) -> Iterator[KeyScan]:
     """
-    Press/release keys as appropriate.
+    Read key state messages from Arduino.
+
+    The Arduino must NOT be in debug mode.
+
+    @param[in] device Serial device of Arduino (e.g. /dev/ttyACM0 - *nix, COM3 - windows)
+    @param[in] baudrate Baudrate for serial communication
+    @return Generator of keyscans.
     """
-    for idx, voltage in enumerate(keyscan):
-        if idx in KEYS:
-            if idx in pressed_keys:
-                if key_pressed(voltage, idx):
-                    increment_confidence(idx, max_confidence)
+    with serial.Serial(port=device, baudrate=baudrate, timeout=1.0) as ser:
+        while True:
+            try:
+                key, state = map(int, ser.readline().strip().split(b","))
+                if state == KEY_PRESSED_STATE:
+                    press_key(key, dry_run)
                 else:
-                    decrement_confidence(idx)
-                    if KEYS[idx]["confidence"] == 0:
-                        release_key(idx, dry_run)
-                        pressed_keys.remove(idx)
-            else:
-                if key_pressed(voltage, idx):
-                    press_key(idx, voltage, dry_run)
-                    pressed_keys.add(idx)
-                    KEYS[idx]["confidence"] = (
-                        KEYS[idx]["max_confidence"]
-                        if "max_confidence" in KEYS[idx]
-                        else max_confidence
-                    )
-
-
-def print_raw_scan(scan: KeyScan) -> None:
-    """
-    Print raw voltages of scan.
-
-    Values are printed with 4 digits to ensure consisent width.
-
-    @param[in] scan Keyboard scan.
-    """
-    for row in scan.reshape(8, 12).astype(int):
-        print(",".join(f"{num:4d}" for num in row))
-    print()
+                    release_key(key, dry_run)
+            except ValueError:
+                continue
 
 
 def key_idx_from_name(key_name: str) -> int:
@@ -254,7 +273,7 @@ def pyplot_args(timestamps: PlotData, voltages: dict[int, PlotData]) -> list[Plo
 
 
 def plot_key_voltages(
-    keys: list[str], device: str, measurement_period: float = 3.0
+        keys: list[str], device: str, baudrate: int, measurement_period: float = 3.0
 ) -> None:
     """
     Plot voltages on specified keys over a given period of time.
@@ -267,7 +286,7 @@ def plot_key_voltages(
     timestamps = []
     voltages = {key: [] for key in keys}
     for scan, timestamp in zip(
-        read_keyscans(device=device),
+        read_keyscans(device=device, baudrate=baudrate),
         timestamp_generator(end_time=time.time() + measurement_period),
     ):
         timestamps.append(timestamp)
@@ -277,28 +296,18 @@ def plot_key_voltages(
     plt.show()
 
 
-def load_key_calibration(cal_fd: TextIO) -> None:
-    """
-    Load key calibration from file.
-
-    @param[in] cal_fd File descriptor of open calibration file.
-    """
-    for field, cfg in json.load(cal_fd).items():
-        if field == "global":
-            GLOBAL_CONFIG.update(cfg)
-        else:
-            KEYS[int(field)] = cfg
-
-
 def get_args() -> argparse.Namespace:
     """
     Define and parse args
     """
     parser = argparse.ArgumentParser(prog="DisplayWriter Receiver")
     parser.add_argument(
-        "--calibrate",
-        action="store_true",
-        help="Auto-calibrate the keyboard (TODO)",
+        "--baudrate",
+        "--baud",
+        "-b",
+        type=int,
+        default=115200,
+        help="Baudrate for serial communication with Arduino",
     )
     parser.add_argument(
         "--calibration",
@@ -328,6 +337,13 @@ def get_args() -> argparse.Namespace:
         help="Print registered keypresses rather than sending them to the OS.",
     )
     parser.add_argument(
+        "--niceness",
+        "-n",
+        type=int,
+        default=-10,
+        help="Receiver niceness (priority for OS). Only works on *nix",
+    )
+    parser.add_argument(
         "--plot-keys",
         "-p",
         type=str,
@@ -348,8 +364,10 @@ def main(args: argparse.Namespace) -> int:
     with open(args.calibration, "r") as cal_fd:
         load_key_calibration(cal_fd)
 
+    set_niceness(niceness=args.niceness)
+
     if args.raw:
-        for scan in read_keyscans(device=args.device):
+        for scan in read_keyscans(device=args.device, baudrate=args.baudrate):
             print_raw_scan(scan)
         return 0
 
@@ -360,18 +378,11 @@ def main(args: argparse.Namespace) -> int:
     if args.plot_keys is not None:
         while True:
             plot_key_voltages(
-                keys=args.plot_keys.strip().split(","), device=args.device
+                keys=args.plot_keys.strip().split(","), device=args.device, baudrate=args.baudrate
             )
         return 0
 
-    if args.calibrate:
-        calibrate_keyboard()
-        with open(args.calibration, "w") as cal_file:
-            json.dump(KEYS, cal_file)
-
-    pressed_keys = set()
-    for keyscan in read_keyscans(device=args.device):
-        press_keys(keyscan, pressed_keys, args.dry_run)
+    read_messages(device=args.device, baudrate=args.baudrate, dry_run=args.dry_run)
 
     return 0
 

@@ -1,314 +1,235 @@
 {
-  "global": {
-    "ewme_ratio": 1.00
-  },
   "38": {
-    "name": "left alt",
-    "voltage_threshold": 200
+    "name": "left alt"
   },
   "44": {
-    "name": "right alt",
-    "voltage_threshold": 200
+    "name": "right alt"
   },
   "37": {
-    "name": "space",
-    "voltage_threshold": 200
+    "name": "space"
   },
   "50": {
-    "name": "left shift",
-    "voltage_threshold": 200
+    "name": "left shift"
   },
   "51": {
-    "name": "left ctrl",
-    "voltage_threshold": 200
+    "name": "left ctrl"
   },
   "57": {
-    "name": "right shift",
-    "voltage_threshold": 200
+    "name": "right shift"
   },
   "62": {
     "name": "caps lock",
-    "press_and_release": true,
-    "voltage_threshold": 200
+    "press_and_release": true
   },
   "48": {
-    "name": "left ctrl",
-    "voltage_threshold": 200
+    "name": "left ctrl"
   },
   "49": {
-    "name": "left ctrl",
-    "voltage_threshold": 200
+    "name": "left ctrl"
   },
   "24": {
-    "name": "left windows",
-    "voltage_threshold": 200
+    "name": "left windows"
   },
   "25": {
-    "name": "left windows",
-    "voltage_threshold": 200
+    "name": "left windows"
   },
   "59": {
-    "name": "right ctrl",
-    "voltage_threshold": 200
+    "name": "right ctrl"
   },
   "71": {
-    "name": "right windows",
-    "voltage_threshold": 200
+    "name": "right windows"
   },
   "74": {
-    "name": "tab",
-    "voltage_threshold": 200
+    "name": "tab"
   },
   "9": {
-    "name": "backspace",
-    "voltage_threshold": 200
+    "name": "backspace"
   },
   "21": {
-    "name": "return",
-    "voltage_threshold": 200
+    "name": "return"
   },
   "68": {
     "name": "\\",
-    "scancode": 43,
-    "voltage_threshold": 200
+    "scancode": 43
   },
   "84": {
-    "name": "escape",
-    "voltage_threshold": 200
+    "name": "escape"
   },
   "85": {
-    "name": "escape",
-    "voltage_threshold": 200
+    "name": "escape"
   },
   "70": {
-    "name": "up",
-    "voltage_threshold": 200
+    "name": "up"
   },
   "46": {
-    "name": "left",
-    "voltage_threshold": 200
+    "name": "left"
   },
   "58": {
-    "name": "down",
-    "voltage_threshold": 200
+    "name": "down"
   },
   "47": {
-    "name": "right",
-    "voltage_threshold": 200
+    "name": "right"
   },
   "22": {
-    "name": "delete",
-    "voltage_threshold": 200
+    "name": "delete"
   },
   "10": {
-    "name": "insert",
-    "voltage_threshold": 200
+    "name": "insert"
   },
   "94": {
-    "name": "home",
-    "voltage_threshold": 200
+    "name": "home"
   },
   "82": {
-    "name": "end",
-    "voltage_threshold": 200
+    "name": "end"
   },
   "11": {
-    "name": "page up",
-    "voltage_threshold": 200
+    "name": "page up"
   },
   "23": {
-    "name": "page down",
-    "voltage_threshold": 200
+    "name": "page down"
   },
   "3": {
-    "name": "1",
-    "voltage_threshold": 200
+    "name": "1"
   },
   "87": {
-    "name": "2",
-    "voltage_threshold": 200
+    "name": "2"
   },
   "4": {
-    "name": "3",
-    "voltage_threshold": 200
+    "name": "3"
   },
   "88": {
-    "name": "4",
-    "voltage_threshold": 200
+    "name": "4"
   },
   "5": {
-    "name": "5",
-    "voltage_threshold": 200
+    "name": "5"
   },
   "89": {
-    "name": "6",
-    "voltage_threshold": 200
+    "name": "6"
   },
   "6": {
-    "name": "7",
-    "voltage_threshold": 200
+    "name": "7"
   },
   "90": {
-    "name": "8",
-    "voltage_threshold": 200
+    "name": "8"
   },
   "7": {
-    "name": "9",
-    "voltage_threshold": 200
+    "name": "9"
   },
   "91": {
-    "name": "0",
-    "voltage_threshold": 200
+    "name": "0"
   },
   "15": {
-    "name": "q",
-    "voltage_threshold": 200
+    "name": "q"
   },
   "75": {
-    "name": "w",
-    "voltage_threshold": 200
+    "name": "w"
   },
   "16": {
-    "name": "e",
-    "voltage_threshold": 200
+    "name": "e"
   },
   "76": {
-    "name": "r",
-    "voltage_threshold": 200
+    "name": "r"
   },
   "17": {
-    "name": "t",
-    "voltage_threshold": 200
+    "name": "t"
   },
   "77": {
-    "name": "y",
-    "voltage_threshold": 200
+    "name": "y"
   },
   "18": {
-    "name": "u",
-    "voltage_threshold": 200
+    "name": "u"
   },
   "78": {
-    "name": "i",
-    "voltage_threshold": 200
+    "name": "i"
   },
   "19": {
-    "name": "o",
-    "voltage_threshold": 200
+    "name": "o"
   },
   "79": {
-    "name": "p",
-    "voltage_threshold": 200
+    "name": "p"
   },
   "27": {
-    "name": "a",
-    "voltage_threshold": 200
+    "name": "a"
   },
   "63": {
-    "name": "s",
-    "voltage_threshold": 200
+    "name": "s"
   },
   "28": {
-    "name": "d",
-    "voltage_threshold": 200
+    "name": "d"
   },
   "64": {
-    "name": "f",
-    "voltage_threshold": 200
+    "name": "f"
   },
   "29": {
-    "name": "g",
-    "voltage_threshold": 200
+    "name": "g"
   },
   "65": {
-    "name": "h",
-    "voltage_threshold": 200
+    "name": "h"
   },
   "30": {
-    "name": "j",
-    "voltage_threshold": 200
+    "name": "j"
   },
   "66": {
-    "name": "k",
-    "voltage_threshold": 200
+    "name": "k"
   },
   "31": {
-    "name": "l",
-    "voltage_threshold": 200
+    "name": "l"
   },
   "39": {
-    "name": "z",
-    "voltage_threshold": 200
+    "name": "z"
   },
   "52": {
-    "name": "x",
-    "voltage_threshold": 200
+    "name": "x"
   },
   "40": {
-    "name": "c",
-    "voltage_threshold": 200
+    "name": "c"
   },
   "53": {
-    "name": "v",
-    "voltage_threshold": 200
+    "name": "v"
   },
   "41": {
-    "name": "b",
-    "voltage_threshold": 200
+    "name": "b"
   },
   "54": {
-    "name": "n",
-    "voltage_threshold": 200
+    "name": "n"
   },
   "42": {
-    "name": "m",
-    "voltage_threshold": 200
+    "name": "m"
   },
   "86": {
-    "name": "`",
-    "voltage_threshold": 200
+    "name": "`"
   },
   "43": {
-    "name": ".",
-    "voltage_threshold": 200
+    "name": "."
   },
   "55": {
-    "name": ",",
-    "voltage_threshold": 200
+    "name": ","
   },
   "93": {
-    "name": "right ctrl",
-    "voltage_threshold": 200
+    "name": "right ctrl"
   },
   "56": {
-    "name": "/",
-    "voltage_threshold": 200
+    "name": "/"
   },
   "32": {
-    "name": "'",
-    "voltage_threshold": 200
+    "name": "'"
   },
   "67": {
-    "name": ";",
-    "voltage_threshold": 200
+    "name": ";"
   },
   "20": {
     "name": "[",
-    "scancode": 26,
-    "voltage_threshold": 200
+    "scancode": 26
   },
   "80": {
     "name": "]",
-    "scancode": 27,
-    "voltage_threshold": 200
+    "scancode": 27
   },
   "8": {
     "name": "-",
-    "scancode": 12,
-    "voltage_threshold": 200
+    "scancode": 12
   },
   "92": {
-    "name": "=",
-    "voltage_threshold": 200
+    "name": "="
   }
 }
