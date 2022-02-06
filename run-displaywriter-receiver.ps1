@@ -1,1 +1,0 @@
-python C:\Users\Emily\src\displaywriter\displaywriter_receiver\displaywriter_receiver.py --device="COM3" --calibration="C:\Users\Emily\src\displaywriter\calibration.json"
