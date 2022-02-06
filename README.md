@@ -11,14 +11,15 @@ This project is intended to be as electronically simple as possible, and is gene
 
 
 # Overview
-This system replaces the original IBM controller. It utilises an Arduino Mega's 8 analog input pins (rows) and 12 of its output pins (columns), along with some LM339N comparators and a relatively small amount of circuitry, to scan the keyboard. It seems that other beamspring keyboards and even other displaywriter keyboards have only 4 rows, which may make it feasible to use a smaller Arduino for such keyboards, but I can't confirm that.
+This system replaces the original IBM controller. It utilises:
+- An Arduino Mega for 12 of its output pins (to pulse the keyboard's columns) and its 8 analog input pins (to read the keyboard's rows)
+- Two LM339N comparators, each handling 4 of the keyboard's 8 rows.
+- Some resistors, a potentiometer, and some capacitors.
+- Python code running on the host machine to read messages from the arduino over serial and generate keypresses.
 
+It seems that other beamspring keyboards and maybe even other displaywriter keyboards have only 4 rows, which may make it feasible to use e.g. an Arduino Leonardo to present to the OS as a USB keyboard and do away with the Python receiver code entirely.
 
-# Arduino Configuration
-This project makes use of Nico Hood's [HoodLoader2 bootloader](https://github.com/NicoHood/HoodLoader2) and [HID API](https://github.com/NicoHood/HID), which allows various Arduinos (including the Mega) to present as a USB keyboard, among many other things. Both projects have their own wikis with installation instructions, but the steps to setup the arduino for this project are outlined below.
-
-## Installing the Hoodloader2 bootloader
-
+I considered using a separate Arduino Leonardo, or the [HoodLoader2](https://github.com/NicoHood/HoodLoader2) bootloader to do this, but found the receiver code is reliable and seamless when hooked into my init system, and I would prefer to keep the project simple. With this said, it does help to have a spare keyboard to get into the motherboard's UEFI setup or select a different boot device!
 
 
 # Circuitry
