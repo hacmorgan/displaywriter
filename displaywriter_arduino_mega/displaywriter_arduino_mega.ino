@@ -43,7 +43,7 @@ bool key_exists[ROWS][COLUMNS];  // Quickly check whether a given key index actu
 
 
 // Key detection
-const int default_voltage_threshold = 20;  // A key that measures above this voltage is considered pressed
+const int default_voltage_threshold = 120;  // A key that measures above this voltage is considered pressed
 const int special_voltage_thresholds[][2] = {
   { 0, 600},
   {50, 120},

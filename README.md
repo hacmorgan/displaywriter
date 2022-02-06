@@ -28,3 +28,34 @@ TODO
 
 # Software
 TODO
+
+
+# Calibrating the keyboard
+This system requires some careful calibration to work correctly, primarily concerning:
+- the voltage threshold for keys to be considered pressed (in software)
+- the reference voltage for the comparators (by adjusting potentiometer)
+
+Once calibrated, the keyboard is responsive and reliable, and should not need further calibration.
+
+## Setting the reference voltage
+The voltage reference is set by a voltage divider with a 10K potentiometer in series with the resistor to GND. This could also be done with a DAC, but a POT is simpler and easier to experiment with.
+
+- Ensure the Arduino is in debug mode by setting `DEBUG_MODE = true` at the top of `displaywriter_arduino_mega.ino`.
+  - Don't forget to reprogram the Arduino to incorporate this change!
+- Run the receiver in raw mode: `sudo displaywriter_receiver.py --raw`
+
+You will see a voltage between 0 and 1023 for each key in the keyboard. Ideally, these values should all be 0 unless the key is pressed. There will be some values that do not go to 0, but this is to be expected. Not every column has 8 keys, so sometimes the arduino will pulse a column and read a row that is not capacitively coupled to that column, producing these high values. For me, a pressed key will have a value around 400 (between 200 and 600 for almost all keys).
+
+## Setting the voltage threshold
+With an idea of the voltages we can expect to see when a key is pressed from using the receiver in raw mode, we can now:
+- Put the Arduino back in normal mode by setting `DEBUG_MODE = false` in `displaywriter_arduino_mega.ino`.
+  - Don't forget to reprogram the Arduino to incorporate this change.
+- Run the receiver in dry run mode: `sudo displaywriter_receiver.py --dry-run`
+
+This will print to stdout whenever a key would be pressed, to allow us to find false detections or keys that don't register reliably when pressed. The reference voltage must be set on the arduino, so this may take a few cycles of
+- Reprogram Arduino
+- Run receiver in dry run mode
+- Test the keyboard, observe unresponsive keys and/or keys that trigger when not pressed
+- Kill receiver
+- Change threshold
+- Repeat
