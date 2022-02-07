@@ -126,7 +126,7 @@ def print_raw_scan(scan: KeyScan) -> None:
     print()
 
 
-def measure_voltages(samples: int = 25) -> Iterator[tuple[np.ndarray, np.ndarray]]:
+def measure_voltages(device: str, baudrate: int, samples: int = 25) -> Iterator[tuple[np.ndarray, np.ndarray]]:
     """
     Measure the voltages of each key over a period of time.
 
@@ -139,7 +139,7 @@ def measure_voltages(samples: int = 25) -> Iterator[tuple[np.ndarray, np.ndarray
     """
     voltages = np.zeros((samples, NUM_KEYS), dtype=int)
     idx = 0
-    for keyscan in read_keyscans():
+    for keyscan in read_keyscans(device=device, baudrate=baudrate):
         voltages[idx, :] = keyscan
         idx += 1
         if idx == samples:
@@ -147,7 +147,7 @@ def measure_voltages(samples: int = 25) -> Iterator[tuple[np.ndarray, np.ndarray
             idx = 0
 
 
-def detect_likely_keys() -> None:
+def detect_likely_keys(device: str, baudrate: int) -> None:
     """
     Detect keys that might be pressed.
 
@@ -157,9 +157,9 @@ def detect_likely_keys() -> None:
     Requires Arduino to be in debug mode.
     """
     print("Measuring baseline voltages...")
-    mean_voltages, stddev_voltages = next(measure_voltages())
+    mean_voltages, stddev_voltages = next(measure_voltages(device, baudrate))
     print("Done!")
-    for new_mean_voltages, new_stddev_voltages in measure_voltages():
+    for new_mean_voltages, new_stddev_voltages in measure_voltages(device, baudrate):
         mean_voltage_diffs = new_mean_voltages - mean_voltages
         mean_voltage_diffs_percent = (
             (new_mean_voltages - mean_voltages) / (mean_voltages + 0.1) * 100
@@ -366,7 +366,7 @@ def main(args: argparse.Namespace) -> int:
         return 0
 
     if args.detect:
-        print(detect_likely_keys())
+        print(detect_likely_keys(device=args.device, baudrate=args.baudrate))
         return 0
 
     if args.plot_keys is not None:

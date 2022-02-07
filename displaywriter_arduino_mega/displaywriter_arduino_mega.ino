@@ -15,8 +15,8 @@
 
 /* In debug mode, send raw key voltages to host machine rather than pressed/released key
    index. This is required for some debugging modes of the receiver. */
-/* bool DEBUG_MODE = true; */
 bool DEBUG_MODE = false;
+/* bool DEBUG_MODE = true; */
 
 
 // Input and output pins
@@ -45,8 +45,8 @@ bool key_exists[ROWS][COLUMNS];  // Quickly check whether a given key index actu
 // Key detection
 const int default_voltage_threshold = 120;  // A key that measures above this voltage is considered pressed
 const int special_voltage_thresholds[][2] = {
-  { 0, 600},
-  {50, 120},
+  {0, 600},
+  {3, 220},
 };
 const int num_special_voltage_thresholds = sizeof(special_voltage_thresholds) / (sizeof(special_voltage_thresholds[0][0]) * 2);
 int voltage_threshold[ROWS][COLUMNS];  // Allows for custom voltage thresholds
