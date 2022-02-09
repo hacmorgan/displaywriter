@@ -97,7 +97,7 @@ def read_keyscans(
 
     The Arduino must be in debug mode.
 
-    @param[in] device Serial device of Arduino (e.g. /dev/ttyACM0 - *nix, COM3 - windows)
+    @param[in] device Serial device of Arduino (e.g. /dev/ttyACM0 - Linux, COM3 - windows)
     @param[in] baudrate Baudrate for serial communication
     @return Generator of keyscans.
     """
@@ -207,6 +207,8 @@ def release_key(idx: int, dry_run: bool) -> None:
         print(f"Releasing: {KEYS[idx]}")
     else:
         key = KEYS[idx]["scancode"] if "scancode" in KEYS[idx] else KEYS[idx]["name"]
+        if "press_and_release" in KEYS[idx] and KEYS[idx]["press_and_release"]:
+            keyboard.press_and_release(key)
         keyboard.release(key)
 
 
