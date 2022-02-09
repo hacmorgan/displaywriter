@@ -10,11 +10,13 @@ The Arduino can either send full analog scans of the keyboard (when it is in deb
 or just which key has been pressed or released (when it is in normal mode).
 
 Some debugging operations (e.g. --raw, --detect) require the Arduino to be in debug mode,
-but normal operation expects it to be in normal mode.
+but normal operation expects it to be in normal mode. This is set in the Arudino code, so
+it needs to be reprogrammed before any debugging operations (and vice-versa).
 
-Originally this program would detect which key is pressed from analog scans of the
-keyboard, but that requires constant serial communincation with the Arduino, which is
-inefficient, and requires about 5% of one CPU's time at all times for smooth operation.
+Originally the arduino only operated in debug mode, so this program would detect which
+key is pressed by analysing the analog scans of the keyboard, but that requires constant
+serial communincation with the Arduino, which requires about 5% of one CPU's time at all
+times for smooth operation.
 
 @author  Hamish Morgan
 @date    20/01/2021
@@ -36,8 +38,8 @@ import numpy as np
 import serial
 
 
-GLOBAL_CONFIG = {}
 KEYS = {}  # filled in from calibration file
+FUNCTION_MODIFIER_KEYS = {}  # copied from KEYS
 NUM_KEYS = 96  # number of values sent by arduino
 
 # Aliases for decoding messages from Arduino
@@ -52,6 +54,13 @@ KeyScan = np.ndarray
 PlotData = list[float]
 
 
+def is_function_key_modifier(idx) -> bool:
+    """
+    Check whether a key is the function key modifier.
+    """
+    return "type" in KEYS[idx] and KEYS[idx]["type"] == "function_key_modifier"
+
+
 def load_key_calibration(cal_fd: TextIO) -> None:
     """
     Load key calibration from file.
@@ -59,10 +68,11 @@ def load_key_calibration(cal_fd: TextIO) -> None:
     @param[in] cal_fd File descriptor of open calibration file.
     """
     for field, cfg in json.load(cal_fd).items():
-        if field == "global":
-            GLOBAL_CONFIG.update(cfg)
-        else:
-            KEYS[int(field)] = cfg
+        idx = int(field)
+        KEYS[idx] = cfg
+        if is_function_key_modifier(idx):
+            FUNCTION_MODIFIER_KEYS[idx] = cfg
+            FUNCTION_MODIFIER_KEYS[idx]["pressed"] = False
 
 
 def set_niceness(niceness: int = -10) -> bool:
@@ -85,7 +95,6 @@ def set_niceness(niceness: int = -10) -> bool:
         except OSError:
             pass
     return False
-    
 
 
 def read_keyscans(
@@ -126,7 +135,9 @@ def print_raw_scan(scan: KeyScan) -> None:
     print()
 
 
-def measure_voltages(device: str, baudrate: int, samples: int = 25) -> Iterator[tuple[np.ndarray, np.ndarray]]:
+def measure_voltages(
+    device: str, baudrate: int, samples: int = 25
+) -> Iterator[tuple[np.ndarray, np.ndarray]]:
     """
     Measure the voltages of each key over a period of time.
 
@@ -176,68 +187,6 @@ def detect_likely_keys(device: str, baudrate: int) -> None:
         print("\n")
 
 
-def press_key(idx: int, dry_run: bool) -> None:
-    """
-    Press key with given index, or just pretend to.
-
-    @param[in] idx Index of key.
-    @param[in] dry_run Print a message to stdout instead of actually pressing key if True
-    """
-    if idx not in KEYS:
-        return
-    if dry_run:
-        print(f"Pressing: {KEYS[idx]}")
-    else:
-        key = KEYS[idx]["scancode"] if "scancode" in KEYS[idx] else KEYS[idx]["name"]
-        if "press_and_release" in KEYS[idx] and KEYS[idx]["press_and_release"]:
-            keyboard.press_and_release(key)
-        keyboard.press(key)
-
-
-def release_key(idx: int, dry_run: bool) -> None:
-    """
-    Release key with given index, or just pretend to.
-
-    @param[in] idx Index of key.
-    @param[in] dry_run Print a message to stdout instead of actually pressing key if True
-    """
-    if idx not in KEYS:
-        return
-    if dry_run:
-        print(f"Releasing: {KEYS[idx]}")
-    else:
-        key = KEYS[idx]["scancode"] if "scancode" in KEYS[idx] else KEYS[idx]["name"]
-        if "press_and_release" in KEYS[idx] and KEYS[idx]["press_and_release"]:
-            keyboard.press_and_release(key)
-        keyboard.release(key)
-
-
-def read_messages(
-    device: str,
-    baudrate: int,
-    dry_run: bool,
-) -> Iterator[KeyScan]:
-    """
-    Read key state messages from Arduino.
-
-    The Arduino must NOT be in debug mode.
-
-    @param[in] device Serial device of Arduino (e.g. /dev/ttyACM0 - *nix, COM3 - windows)
-    @param[in] baudrate Baudrate for serial communication
-    @return Generator of keyscans.
-    """
-    with serial.Serial(port=device, baudrate=baudrate, timeout=1.0) as ser:
-        while True:
-            try:
-                key, state = map(int, ser.readline().strip().split(b","))
-                if state == KEY_PRESSED_STATE:
-                    press_key(key, dry_run)
-                else:
-                    release_key(key, dry_run)
-            except ValueError:
-                continue
-
-
 def key_idx_from_name(key_name: str) -> int:
     """
     Find key index of key with given name
@@ -269,7 +218,7 @@ def pyplot_args(timestamps: PlotData, voltages: dict[int, PlotData]) -> list[Plo
 
 
 def plot_key_voltages(
-        keys: list[str], device: str, baudrate: int, measurement_period: float = 3.0
+    keys: list[str], device: str, baudrate: int, measurement_period: float = 3.0
 ) -> None:
     """
     Plot voltages on specified keys over a given period of time.
@@ -290,6 +239,122 @@ def plot_key_voltages(
             voltages[key].append(scan[key])
     plt.plot(*pyplot_args(timestamps, voltages))
     plt.show()
+
+
+def shadows_function_key(idx: int) -> bool:
+    """
+    Check whether a key shadows a function key (e.g. 2 -> F2)
+    """
+    return "shadow_function_key" in KEYS[idx]
+
+
+def should_use_function_key(idx: int) -> bool:
+    """
+    Check whether key should be treated as a function key
+    """
+    return shadows_function_key(idx) and any(
+        FUNCTION_MODIFIER_KEYS[idx]["pressed"] for idx in FUNCTION_MODIFIER_KEYS
+    )
+
+
+def get_key(idx: int) -> str:
+    """
+    Get scancode or name of key from its index.
+
+    If key shadows a function key and function modifier key is down, return function key.
+    """
+    if should_use_function_key(idx):
+        return KEYS[idx]["shadow_function_key"]
+    if "scancode" in KEYS[idx]:
+        return KEYS[idx]["scancode"]
+    return KEYS[idx]["name"]
+
+
+def should_press_and_release(idx: int) -> bool:
+    """
+    Check whether a key should be pressed and released instead of just pressed.
+    """
+    return "press_and_release" in KEYS[idx] and KEYS[idx]["press_and_release"]
+
+
+def press_key(idx: int, dry_run: bool) -> None:
+    """
+    Press key with given index, or just pretend to.
+
+    @param[in] idx Index of key.
+    @param[in] dry_run Print a message to stdout instead of actually pressing key if True
+    """
+    if idx not in KEYS:
+        return
+
+    if dry_run:
+        print(f"Pressing: {KEYS[idx]}")
+        return
+
+    if is_function_key_modifier(idx):
+        FUNCTION_MODIFIER_KEYS[idx]["pressed"] = True
+        return
+
+    key = get_key(idx)
+
+    if should_press_and_release(idx):
+        keyboard.press_and_release(key)
+        return
+
+    keyboard.press(key)
+
+
+def release_key(idx: int, dry_run: bool) -> None:
+    """
+    Release key with given index, or just pretend to.
+
+    @param[in] idx Index of key.
+    @param[in] dry_run Print a message to stdout instead of actually pressing key if True
+    """
+    if idx not in KEYS:
+        return
+
+    if dry_run:
+        print(f"Releasing: {KEYS[idx]}")
+        return
+
+    if is_function_key_modifier(idx):
+        FUNCTION_MODIFIER_KEYS[idx]["pressed"] = False
+        return
+
+    key = get_key(idx)
+
+    if should_press_and_release(idx):
+        keyboard.press_and_release(key)
+        return
+
+    keyboard.release(key)
+
+
+def read_messages(
+    device: str,
+    baudrate: int,
+    dry_run: bool,
+) -> Iterator[KeyScan]:
+    """
+    Read key state messages from Arduino.
+
+    The Arduino must NOT be in debug mode.
+
+    @param[in] device Serial device of Arduino (e.g. /dev/ttyACM0 - *nix, COM3 - windows)
+    @param[in] baudrate Baudrate for serial communication
+    @return Generator of keyscans.
+    """
+    with serial.Serial(port=device, baudrate=baudrate, timeout=1.0) as ser:
+        while True:
+            try:
+                key, pressed = map(int, ser.readline().strip().split(b","))
+                if pressed:
+                    press_key(key, dry_run)
+                else:
+                    release_key(key, dry_run)
+            except ValueError:
+                continue
 
 
 def get_args() -> argparse.Namespace:
@@ -365,20 +430,20 @@ def main(args: argparse.Namespace) -> int:
     if args.raw:
         for scan in read_keyscans(device=args.device, baudrate=args.baudrate):
             print_raw_scan(scan)
-        return 0
 
-    if args.detect:
+    elif args.detect:
         print(detect_likely_keys(device=args.device, baudrate=args.baudrate))
-        return 0
 
-    if args.plot_keys is not None:
+    elif args.plot_keys is not None:
         while True:
             plot_key_voltages(
-                keys=args.plot_keys.strip().split(","), device=args.device, baudrate=args.baudrate
+                keys=args.plot_keys.strip().split(","),
+                device=args.device,
+                baudrate=args.baudrate,
             )
-        return 0
 
-    read_messages(device=args.device, baudrate=args.baudrate, dry_run=args.dry_run)
+    else:
+        read_messages(device=args.device, baudrate=args.baudrate, dry_run=args.dry_run)
 
     return 0
 

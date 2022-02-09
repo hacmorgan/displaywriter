@@ -1,4 +1,10 @@
 {
+  "0": {
+    "type": "function_key_modifier"
+  },
+  "1": {
+    "type": "function_key_modifier"
+  },
   "38": {
     "name": "left alt"
   },
@@ -89,34 +95,44 @@
     "name": "page down"
   },
   "3": {
-    "name": "1"
+    "name": "1",
+    "shadow_function_key": "F1"
   },
   "87": {
-    "name": "2"
+    "name": "2",
+    "shadow_function_key": "F2"
   },
   "4": {
-    "name": "3"
+    "name": "3",
+    "shadow_function_key": "F3"
   },
   "88": {
-    "name": "4"
+    "name": "4",
+    "shadow_function_key": "F4"
   },
   "5": {
-    "name": "5"
+    "name": "5",
+    "shadow_function_key": "F5"
   },
   "89": {
-    "name": "6"
+    "name": "6",
+    "shadow_function_key": "F6"
   },
   "6": {
-    "name": "7"
+    "name": "7",
+    "shadow_function_key": "F7"
   },
   "90": {
-    "name": "8"
+    "name": "8",
+    "shadow_function_key": "F8"
   },
   "7": {
-    "name": "9"
+    "name": "9",
+    "shadow_function_key": "F9"
   },
   "91": {
-    "name": "0"
+    "name": "0",
+    "shadow_function_key": "F10"
   },
   "15": {
     "name": "q"
@@ -227,9 +243,11 @@
   },
   "8": {
     "name": "-",
-    "scancode": 12
+    "scancode": 12,
+    "shadow_function_key": "F11"
   },
   "92": {
-    "name": "="
+    "name": "=",
+    "shadow_function_key": "F12"
   }
 }
