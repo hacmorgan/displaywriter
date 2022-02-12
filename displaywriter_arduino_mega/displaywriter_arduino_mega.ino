@@ -13,9 +13,10 @@
  */
 
 
-/* In debug mode, send raw key voltages to host machine rather than pressed/released key
-   index. This is required for some debugging modes of the receiver. */
+/* In Normal mode, only communicate with the host machine when a key is pressed or released */
 bool DEBUG_MODE = false;
+
+/* In debug mode, send every voltage of each scan to host machine as 96 comma-separated integers */
 /* bool DEBUG_MODE = true; */
 
 
@@ -37,7 +38,7 @@ const byte nonexistent_keys[] = {  // Not all columns have 8 keys, these indices
 };
 const int num_nonexistent_keys = sizeof(nonexistent_keys) / sizeof(nonexistent_keys[0]);
 byte debounce_time = 5;  // How many consecutive redings below threshold before a key is considered released.
-byte key_state[ROWS][COLUMNS];  // Stores whether each key is currently pressed
+byte key_debounce_count[ROWS][COLUMNS];  // Stores whether each key is currently pressed
 int key_voltage[ROWS][COLUMNS];  // Stores an analog scan of the keyboard
 bool key_exists[ROWS][COLUMNS];  // Quickly check whether a given key index actually exists.
 
@@ -64,13 +65,13 @@ int voltage_threshold[ROWS][COLUMNS];  // Allows for custom voltage thresholds
 void set_analog_read_speed()
 {
   /**
-   * Set ADC prescale to speeds up analogRead
+   * Set ADC prescale to speed up analogRead()
    *
    * The ADC prescale sets the division ratio of the system clock to the ADC.
    * Smaller values read faster but less accurately. The default (and maximum) is 128.
    *
    * We do this by setting the 3 bits of ADPS. The ADC prescale is given by 2^ADPS,
-   * so ADPS = 0b101 -> 2^5 == 32
+   * so ADPS = 0b101 == 5 -> 2^5 == 32
    *
    * Experimentally, the best value for this application is 16 or 32.
    */
@@ -103,6 +104,9 @@ void setup_pins()
 
 byte key_index(byte row, byte col)
 {
+  /**
+   * Calculate the index of a key by its row and column.
+   */
   return row * COLUMNS + col;
 }
 
@@ -122,22 +126,6 @@ bool check_key_exists(byte row, byte col)
 }
 
 
-void fill_nonexistent_key_map()
-{
-  /**
-   * Fill out nonexistent key map.
-   *
-   * This provides a quick way to check if a given row/column combination actually has a
-   * key, as not all columns have 8 rows attached.
-   */
-  for (int row = 0; row < ROWS; row++) {
-    for (int col = 0; col < COLUMNS; col++) {
-      key_exists[row][col] = check_key_exists(row, col);
-    }
-  }
-}
-
-
 int voltage_threshold_for_key(byte row, byte col)
 {
   /**
@@ -153,27 +141,17 @@ int voltage_threshold_for_key(byte row, byte col)
 }
 
 
-void fill_voltage_thresholds()
+void initialise_arrays()
 {
   /**
-   * Fill out the voltage threshold map.
+   * Initialise all of the 96-element mapping variables (one element for each key).
    */
   for (byte row = 0; row < ROWS; row++) {
     for (byte col = 0; col < COLUMNS; col++) {
+      key_voltage[row][col] = 0;
+      key_debounce_count[row][col] = 0;
+      key_exists[row][col] = check_key_exists(row, col);
       voltage_threshold[row][col] = voltage_threshold_for_key(row, col);
-    }
-  }
-}
-
-
-void clear_key_state()
-{
-  /**
-   * Clear the key state array, to make sure all keys are assumed unpressed.
-   */
-  for (byte row = 0; row < ROWS; row++) {
-    for (byte col = 0; col < COLUMNS; col++) {
-      key_state[row][col] = 0;
     }
   }
 }
@@ -201,10 +179,66 @@ void scan_keyboard()
   {
     for (int col = 0; col < COLUMNS; col++)
     {
-      pulse_column(col);
-      key_voltage[row][col] = analogRead(ROW_PIN[row]);
+      if (key_exists[row][col]) {
+        pulse_column(col);
+        key_voltage[row][col] = analogRead(ROW_PIN[row]);
+      }
     }
   }
+}
+
+
+bool key_pressed(byte row, byte col)
+{
+  /**
+   * Check whether a key has just been pressed
+   *
+   * Only returns true if the key was unpressed last time we checked
+   */
+  return key_debounce_count[row][col] == 0 &&
+    key_voltage[row][col] > voltage_threshold[row][col];
+}
+
+
+bool key_released(byte row, byte col)
+{
+  /**
+   * Check whether a key has just been released
+   *
+   * Only returns true if the key was pressed last time we checked
+   */
+  return key_debounce_count[row][col] > 0 &&
+    key_voltage[row][col] < voltage_threshold[row][col];
+}
+
+
+void send_key_pressed(byte row, byte col)
+{
+  /**
+   * Send the "key pressed" message to the host machine for a key.
+   */
+  Serial.print(key_index(row, col));
+  Serial.println(",1");  // 1 -> pressed
+}
+
+
+void send_key_released(byte row, byte col)
+{
+  /**
+   * Send the "key released" message to the host machine for a key.
+   */
+  Serial.print(key_index(row, col));
+  Serial.println(",0");  // 0 -> unpressed
+}
+
+
+void send_debug_voltage(byte row, byte col)
+{
+  /**
+   * Send the analog voltage of a key to the host machine.
+   */
+  Serial.print(key_voltage[row][col]);
+  Serial.print(",");
 }
 
 
@@ -218,25 +252,24 @@ void send_scan_to_host()
    */
   for (int row = 0; row < ROWS; row++) {
     for (int col = 0; col < COLUMNS; col++) {
-      if (DEBUG_MODE) {
-        Serial.print(key_voltage[row][col]);
-        Serial.print(",");
-      } else {
+      if (!DEBUG_MODE) {
         if (!key_exists[row][col]) {
           continue;
         }
-        if (key_state[row][col] == 0 && key_voltage[row][col] > voltage_threshold[row][col]) {
-          key_state[row][col] = debounce_time;
-          Serial.print(row * COLUMNS + col);  // key index
-          Serial.println(",1");  // 1 -> pressed
-        } else if (key_state[row][col] > 0 && key_voltage[row][col] < voltage_threshold[row][col]) {
-          key_state[row][col]--;
-          if (key_state[row][col] <= 0) {
-            key_state[row][col] = 0;
-            Serial.print(row * COLUMNS + col);  // key index
-            Serial.println(",0");  // 0 -> unpressed
+        if (key_pressed(row, col)) {
+          key_debounce_count[row][col] = debounce_time;
+          send_key_pressed(row, col);
+        }
+        else if (key_released(row, col)) {
+          key_debounce_count[row][col]--;
+          if (key_debounce_count[row][col] <= 0) {
+            key_debounce_count[row][col] = 0;
+            send_key_released(row, col);
           }
         }
+      }
+      else {
+        send_debug_voltage(row, col);
       }
     }
   }
@@ -249,9 +282,7 @@ void send_scan_to_host()
 void setup()
 {
   setup_pins();
-  clear_key_state();
-  fill_nonexistent_key_map();
-  fill_voltage_thresholds();
+  initialise_arrays();
   Serial.begin(115200);
 }
 

@@ -12,14 +12,16 @@ This project is intended to be as electronically simple as possible, and is gene
 
 # Overview
 This system replaces the original IBM controller. It utilises:
-- An Arduino Mega for 12 of its output pins (to pulse the keyboard's columns) and its 8 analog input pins (to read the keyboard's rows)
-- Two LM339N comparators, each handling 4 of the keyboard's 8 rows.
+- An Arduino Mega
+  - 12 digital output pins (to pulse the keyboard's columns)
+  - 8 analog input pins (to read the keyboard's rows)
+- Two LM339N quad-comparator chips, each handling 4 of the keyboard's 8 rows.
 - Some resistors, a potentiometer, and some capacitors.
 - Python code running on the host machine to read messages from the arduino over serial and generate keypresses.
 
 It seems that other beamspring keyboards and maybe even other displaywriter keyboards have only 4 rows, which may make it feasible to use e.g. an Arduino Leonardo to present to the OS as a USB keyboard and do away with the Python receiver code entirely.
 
-I considered using a separate Arduino Leonardo, or the [HoodLoader2](https://github.com/NicoHood/HoodLoader2) bootloader to do this, but found the receiver code is reliable and seamless when hooked into my init system, and I would prefer to keep the project simple. With this said, it does help to have a spare keyboard to get into the motherboard's UEFI setup or select a different boot device!
+I considered using a separate Arduino Leonardo, or the [HoodLoader2](https://github.com/NicoHood/HoodLoader2) bootloader to do this, but found the receiver code is reliable and seamless when hooked into my init system, and I would prefer to keep the project simple. With this said, it does help to have a spare keyboard to get into the motherboard's UEFI setup or select a different boot device.
 
 
 # Circuitry
@@ -27,7 +29,11 @@ TODO
 
 
 # Software
-TODO
+The Arduino can operate in two modes.
+
+### Normal mode
+In normal mode, the arduino scans all 96 combinations of its 12 column outputs and 8 row inputs, assigning an integer index for each key in the order they were scanned. The Displaywriter actually only has 84 keys, so the 12 nonexistent keys are hardcoded to 0.
+
 
 
 # Calibrating the keyboard
