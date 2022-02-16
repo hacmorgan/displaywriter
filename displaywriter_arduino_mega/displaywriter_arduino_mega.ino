@@ -48,9 +48,9 @@ const int default_voltage_threshold = 120;  // A key that measures above this vo
 const int special_voltage_thresholds[][2] = {
   {0,  600},  // left fn key modifier
   {3,  220},  // 1
-  {29, 400},  // g
-  {30, 400},  // j
-  {32, 400},  // '
+  {29, 320},  // g
+  {30, 350},  // j
+  {32, 320},  // '
 };
 const int num_special_voltage_thresholds = sizeof(special_voltage_thresholds) / (sizeof(special_voltage_thresholds[0][0]) * 2);
 int voltage_threshold[ROWS][COLUMNS];  // Allows for custom voltage thresholds
