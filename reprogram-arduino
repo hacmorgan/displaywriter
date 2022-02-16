@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+
+## Stop receiver, reflash arduino, restart receiver
+
+
+function program_arduino
+{
+    project=displaywriter_arduino_mega
+    port=/dev/ttyACM0
+    board="arduino:avr:mega"
+    
+    arduino-cli compile --fqbn "$board" "$project" &&
+        arduino-cli upload -p "$port" --fqbn "$board" -v "$project"
+}
+
+
+sudo systemctl stop displaywriter-receiver
+program_arduino
+sudo systemctl restart displaywriter-receiver
