@@ -51,6 +51,7 @@ const int special_voltage_thresholds[][2] = {
   {29, 320},  // g
   {30, 320},  // j
   {32, 320},  // '
+  {38, 320},  // left_alt
 };
 const int num_special_voltage_thresholds = sizeof(special_voltage_thresholds) / (sizeof(special_voltage_thresholds[0][0]) * 2);
 int voltage_threshold[ROWS][COLUMNS];  // Allows for custom voltage thresholds
