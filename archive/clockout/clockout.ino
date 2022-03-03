@@ -13,7 +13,7 @@ void setup ()
   // set up Timer 1
   TCCR1A = bit (COM1A0);  // toggle OC1A on Compare Match
   TCCR1B = bit (WGM12) | bit (CS10);   // CTC, no prescaling
-  OCR1A = 1024;       // output every 8th cycle
+  OCR1A = 2;       // output every 8th cycle
 
   for (int i = 0; i < 8; i++) {
     pinMode(ROW_PIN[i], INPUT_PULLUP);  // External 330k pullup resistors used
