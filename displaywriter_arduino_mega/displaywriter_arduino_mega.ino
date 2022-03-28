@@ -31,8 +31,9 @@ const byte COL_PIN[] = {22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44};
 const byte nonexistent_keys[] = {  // Not all columns have 8 keys, these indices will always read high.
   2,
   12, 13, 14,
-  26, 33,
-  36, 45,
+  26,
+  33, 36,
+  45,
   60, 61, 69,
   81
 };
@@ -53,6 +54,7 @@ const int special_voltage_thresholds[][2] = {
   {30, 320},  // j
   {32, 320},  // '
   {38, 320},  // left_alt
+  {58, 40},  // down
 };
 const int num_special_voltage_thresholds = sizeof(special_voltage_thresholds) / (sizeof(special_voltage_thresholds[0][0]) * 2);
 int voltage_threshold[ROWS][COLUMNS];  // Allows for custom voltage thresholds
