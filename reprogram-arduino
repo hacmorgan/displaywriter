@@ -4,6 +4,9 @@
 ## Stop receiver, reflash arduino, restart receiver
 
 
+NO_RESTART="$1"
+
+
 function program_arduino
 {
     project=displaywriter_arduino_mega
@@ -17,4 +20,4 @@ function program_arduino
 
 sudo systemctl stop displaywriter-receiver
 program_arduino
-sudo systemctl restart displaywriter-receiver
+[[ -n "$NO_RESTART" ]] || sudo systemctl restart displaywriter-receiver
