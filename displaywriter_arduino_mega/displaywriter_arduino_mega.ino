@@ -46,7 +46,7 @@ int OTHER_KEYS_PRESSED_THRESHOLD_INCREASE = 100;
 
 
 // Key detection
-const int default_voltage_threshold = 130;  // A key that measures above this voltage is considered pressed
+const int default_voltage_threshold = 140;  // A key that measures above this voltage is considered pressed
 const int special_voltage_thresholds[][2] = {
   {0,  600},  // left fn key modifier
   {3,  220},  // 1
