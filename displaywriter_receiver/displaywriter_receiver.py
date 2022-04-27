@@ -267,6 +267,8 @@ def get_key(idx: int) -> str:
         return KEYS[idx]["shadow_function_key"]
     if "scancode" in KEYS[idx]:
         return KEYS[idx]["scancode"]
+    if "type" in KEYS[idx]:
+        return KEYS[idx]["type"]
     return KEYS[idx]["name"]
 
 
@@ -287,15 +289,16 @@ def press_key(idx: int, dry_run: bool) -> None:
     if idx not in KEYS:
         return
 
-    if dry_run:
-        print(f"Pressing: {KEYS[idx]}")
-        return
+    key = get_key(idx)
 
     if is_function_key_modifier(idx):
         FUNCTION_MODIFIER_KEYS[idx]["pressed"] = True
-        return
+        if not dry_run:
+            return
 
-    key = get_key(idx)
+    if dry_run:
+        print(f"Pressing: {KEYS[idx]} -> {key}")
+        return
 
     if should_press_and_release(idx):
         keyboard.press_and_release(key)
@@ -314,15 +317,16 @@ def release_key(idx: int, dry_run: bool) -> None:
     if idx not in KEYS:
         return
 
-    if dry_run:
-        print(f"Releasing: {KEYS[idx]}")
-        return
+    key = get_key(idx)
 
     if is_function_key_modifier(idx):
         FUNCTION_MODIFIER_KEYS[idx]["pressed"] = False
-        return
+        if not dry_run:
+            return
 
-    key = get_key(idx)
+    if dry_run:
+        print(f"Releasing: {KEYS[idx]}")
+        return
 
     if should_press_and_release(idx):
         keyboard.press_and_release(key)

@@ -42,20 +42,21 @@ byte debounce_time = 5;  // How many consecutive redings below threshold before 
 byte key_debounce_count[ROWS][COLUMNS];  // Stores whether each key is currently pressed
 int key_voltage[ROWS][COLUMNS];  // Stores an analog scan of the keyboard
 bool key_exists[ROWS][COLUMNS];  // Quickly check whether a given key index actually exists.
-int OTHER_KEYS_PRESSED_THRESHOLD_INCREASE = 120;
+int OTHER_KEYS_PRESSED_THRESHOLD_INCREASE = 150;
 
 
 // Key detection
-const int default_voltage_threshold = 160;  // A key that measures above this voltage is considered pressed
+const int default_voltage_threshold = 150;  // A key that measures above this voltage is considered pressed
 const int special_voltage_thresholds[][2] = {
   {0,  600},  // left fn key modifier
   {3,  220},  // 1
   {29, 260},  // g
   {30, 320},  // j
   {32, 320},  // '
-  {38, 500},  // left_alt
+  {38, 300},  // left_alt
   /* {44, 320},  // right_alt */
-  {58, 20},  // down
+  {50, 50},  // left shift
+  {58, 10},  // down
 };
 const int num_special_voltage_thresholds = sizeof(special_voltage_thresholds) / (sizeof(special_voltage_thresholds[0][0]) * 2);
 int voltage_threshold[ROWS][COLUMNS];  // Allows for custom voltage thresholds
@@ -204,7 +205,7 @@ bool key_pressed(byte row, byte col)
    * Only returns true if the key was unpressed last time we checked. Key threshold is increased if any other keys in the row/column are also pressed
    */
   int threshold = voltage_threshold[row][col] +
-    any_keys_pressed(row, col) * OTHER_KEYS_PRESSED_THRESHOLD_INCREASE;
+    any_keys_pressed(row, col) * min(OTHER_KEYS_PRESSED_THRESHOLD_INCREASE, voltage_threshold_for_key(row, col));
   return key_debounce_count[row][col] == 0 &&
     key_voltage[row][col] > threshold;
 }
