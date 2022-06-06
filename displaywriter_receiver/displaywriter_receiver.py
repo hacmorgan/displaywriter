@@ -297,7 +297,7 @@ def press_key(idx: int, dry_run: bool) -> None:
             return
 
     if dry_run:
-        print(f"Pressing: {KEYS[idx]} -> {key}")
+        print(f"Pressing: key by index {idx}: {KEYS[idx]} -> {key}")
         return
 
     if should_press_and_release(idx):

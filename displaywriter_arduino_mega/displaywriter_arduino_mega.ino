@@ -42,39 +42,49 @@ byte debounce_time = 5;  // How many consecutive redings below threshold before 
 byte key_debounce_count[ROWS][COLUMNS];  // Stores whether each key is currently pressed
 int key_voltage[ROWS][COLUMNS];  // Stores an analog scan of the keyboard
 bool key_exists[ROWS][COLUMNS];  // Quickly check whether a given key index actually exists.
-int OTHER_KEYS_PRESSED_THRESHOLD_INCREASE = 160;
 
 
 /**
  Key detection
 */
-const int DEFAULT_VOLTAGE_THRESHOLD = 160;  // A key that measures above this voltage is considered pressed
+const int DVT = 150;  // Default voltage threshold
+const int DTI = 300;  // Default threshold increase (when other keys pressed)
 const int special_voltage_thresholds[][3] = {
-  { 0, 600, 100},  // left fn key modifier
-  { 3, 220, 100},  // 1
-  { 7, 220, 100},  // 9
-  {10, 220, 100},  // insert
-  {15, 100, 200},  // q
-  {16, 100, 100},  // insert
-  {27, 100, 100},  // a
-  {29, 300, 250},  // g
-  {30, 320, 320},  // j
-  {39, 100, 100},  // z
-  {32, 310, 350},  // '
-  {38, 300, 300},  // left_alt
-  {40,  20,  20},  // left arrow
-  {48,  20,  20},  // left ctrl
+  /* { 0, 600, 100},  // left fn key modifier */
+  /* { 3, 220, 100},  // 1 */
+  /* /\* { 7, 220, 100},  // 9 *\/ */
+  /* /\* {10, 220, 100},  // insert *\/ */
+  /* {15, 100, 250},  // q */
+  /* {16, 100, 100},  // e */
+  /* {18, 300, 300},  // u */
+  /* {27, 100, 100},  // a */
+  /* {29, DVT, 300},  // g */
+  {30, DVT, 320},  // j
+  {32, DVT, 400},  // '
+  /* {38, 300, 300},  // left_alt */
+  {39, DVT, 100},  // z
+  {41, DVT, 400},  // b
+  /* {43, 300, 300},  // . */
+  {46, DVT, 100},  // left arrow
+  {47, DVT, 100},  // right arrow
+  /* {48,  20,  20},  // left ctrl */
   {49,  20,  20},  // left ctrl
-  {50,  30,  30},  // left shift
-  {52,  30,  30},  // x
-  {53, 100, 100},  // v
-  {56,  30,  30},  // /
-  {55, 100, 100}, // ,
-  {58,  10,  10},  // down
-  {66,  50,  50},  // k
-  {74,  30,  30},  // tab
-  /* {29, 260},  // g */
-  /* {44, 320},  // right_alt */
+  {50,  20,  30},  // left shift
+  /* {51, 2, 2},  // inner left ctrl */
+  {52, DVT,  30},  // x
+  {53, DVT, 150},  // v
+  {54, DVT,   0},  // n
+  {56, DVT,  30},  // /
+  {55, DVT, 100},  // ,
+  {58,  50,  10},  // down
+  /* {63,  50,  50},  // s */
+  /* {64,  50,  50},  // f */
+  /* {64,  50,  50},  // f */
+  /* {65,  50,  50},  // h */
+  /* {74,  30,  30},  // tab */
+  /* {75,  30,  30},  // w */
+  /* /\* {29, 260},  // g *\/ */
+  /* /\* {44, 320},  // right_alt *\/ */
 };
 const int num_special_voltage_thresholds = sizeof(special_voltage_thresholds) /
   (sizeof(special_voltage_thresholds[0][0]) * 3);
@@ -165,7 +175,7 @@ int voltage_threshold_for_key(byte row, byte col)
       return special_voltage_thresholds[i][1];
     }
   }
-  return DEFAULT_VOLTAGE_THRESHOLD;
+  return DVT;
 }
 
 
@@ -180,7 +190,7 @@ int voltage_threshold_increase_for_key(byte row, byte col)
       return special_voltage_thresholds[i][2];
     }
   }
-  return OTHER_KEYS_PRESSED_THRESHOLD_INCREASE;
+  return DTI;
 }
 
 
