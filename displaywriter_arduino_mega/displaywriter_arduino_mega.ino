@@ -38,7 +38,7 @@ const byte nonexistent_keys[] = {  // Not all columns have 8 keys, these indices
   81
 };
 const int num_nonexistent_keys = sizeof(nonexistent_keys) / sizeof(nonexistent_keys[0]);
-byte debounce_time = 5;  // How many consecutive redings below threshold before a key is considered released.
+byte debounce_time = 4;  // How many consecutive redings below threshold before a key is considered released.
 byte key_debounce_count[ROWS][COLUMNS];  // Stores whether each key is currently pressed
 int key_voltage[ROWS][COLUMNS];  // Stores an analog scan of the keyboard
 bool key_exists[ROWS][COLUMNS];  // Quickly check whether a given key index actually exists.
@@ -47,42 +47,56 @@ bool key_exists[ROWS][COLUMNS];  // Quickly check whether a given key index actu
 /**
  Key detection
 */
-const int DVT = 150;  // Default voltage threshold
+const int DVT = 300;  // Default voltage threshold
 const int DTI = 300;  // Default threshold increase (when other keys pressed)
 const int special_voltage_thresholds[][3] = {
   /* { 0, 600, 100},  // left fn key modifier */
-  /* { 3, 220, 100},  // 1 */
-  /* /\* { 7, 220, 100},  // 9 *\/ */
-  /* /\* {10, 220, 100},  // insert *\/ */
+  { 3, DVT, 700},  // 1
+  { 4, DVT, 700},  // 3
+  { 5, DVT, 700},  // 5
+  { 6, DVT, 700},  // 7
+  { 7, DVT, 700},  // 9
+  { 8, DVT, 700},  // -
+  {10, 600, 400},  // insert
+  {11, DVT, 700},  // page up
   /* {15, 100, 250},  // q */
-  /* {16, 100, 100},  // e */
+  {16, 100, DTI},  // e
   /* {18, 300, 300},  // u */
-  /* {27, 100, 100},  // a */
-  /* {29, DVT, 300},  // g */
-  {30, DVT, 320},  // j
-  {32, DVT, 400},  // '
+  {20, DVT, 600},  // [
+  {21, DVT, 600},  // enter
+  {22, 200, DTI},  // delete
+  {27, 100, DTI},  // a
+  {28, 100, 400},  // d
+  {29, DVT, 600},  // g
+  {30, DVT, 600},  // j
+  {32, DVT, 600},  // '
+  {37, DVT,   0},  // space
   /* {38, 300, 300},  // left_alt */
-  {39, DVT, 100},  // z
+  {39, 150, 100},  // z
+  {40, 150, 400},  // c
   {41, DVT, 400},  // b
-  /* {43, 300, 300},  // . */
+  {43, DVT, 600},  // .
   {46, DVT, 100},  // left arrow
   {47, DVT, 100},  // right arrow
   /* {48,  20,  20},  // left ctrl */
-  {49,  20,  20},  // left ctrl
+  /* {49,  20,  20},  // left ctrl */
   {50,  20,  30},  // left shift
-  /* {51, 2, 2},  // inner left ctrl */
+  {51, 200,  20},  // inner left ctrl
   {52, DVT,  30},  // x
-  {53, DVT, 150},  // v
+  {53, 260,  20},  // v
   {54, DVT,   0},  // n
-  {56, DVT,  30},  // /
-  {55, DVT, 100},  // ,
+  {56, DVT,   0},  // /
+  {55, DVT,  20},  // ,
   {58,  50,  10},  // down
-  /* {63,  50,  50},  // s */
+  {63, 200,   0},  // s
+  {64, DVT,   0},  // f
   /* {64,  50,  50},  // f */
-  /* {64,  50,  50},  // f */
-  /* {65,  50,  50},  // h */
-  /* {74,  30,  30},  // tab */
+  {65, DVT, 300},  // h
+  {66, 150, DTI},  // k
+  {74, 150, DTI},  // tab
   /* {75,  30,  30},  // w */
+  {77, DVT, 600},  // y
+  {86, DVT,  20},  // `
   /* /\* {29, 260},  // g *\/ */
   /* /\* {44, 320},  // right_alt *\/ */
 };
