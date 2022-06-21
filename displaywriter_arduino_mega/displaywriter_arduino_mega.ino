@@ -38,7 +38,7 @@ const byte nonexistent_keys[] = {  // Not all columns have 8 keys, these indices
   81
 };
 const int num_nonexistent_keys = sizeof(nonexistent_keys) / sizeof(nonexistent_keys[0]);
-byte debounce_time = 4;  // How many consecutive redings below threshold before a key is considered released.
+byte debounce_time = 3;  // How many consecutive redings below threshold before a key is considered released.
 byte key_debounce_count[ROWS][COLUMNS];  // Stores whether each key is currently pressed
 int key_voltage[ROWS][COLUMNS];  // Stores an analog scan of the keyboard
 bool key_exists[ROWS][COLUMNS];  // Quickly check whether a given key index actually exists.
@@ -60,19 +60,21 @@ const int special_voltage_thresholds[][3] = {
   {10, 600, 400},  // insert
   {11, DVT, 700},  // page up
   /* {15, 100, 250},  // q */
-  {16, 100, DTI},  // e
-  /* {18, 300, 300},  // u */
+  {16, 150, 100},  // e
+  {18, DVT, 500},  // u
+  {19, DVT, 500},  // o
   {20, DVT, 600},  // [
   {21, DVT, 600},  // enter
   {22, 200, DTI},  // delete
-  {27, 100, DTI},  // a
-  {28, 100, 400},  // d
+  {27, 100, 500},  // a
+  {28, 320, 100},  // d
   {29, DVT, 600},  // g
   {30, DVT, 600},  // j
+  {31, DVT, 600},  // l
   {32, DVT, 600},  // '
-  {37, DVT,   0},  // space
-  /* {38, 300, 300},  // left_alt */
-  {39, 150, 100},  // z
+  {37, DVT,  50},  // space
+  {38, DVT, 400},  // left_alt
+  {39, 200, 200},  // z
   {40, 150, 400},  // c
   {41, DVT, 400},  // b
   {43, DVT, 600},  // .
@@ -83,13 +85,13 @@ const int special_voltage_thresholds[][3] = {
   {50,  20,  30},  // left shift
   {51, 200,  20},  // inner left ctrl
   {52, DVT,  30},  // x
-  {53, 260,  20},  // v
+  {53, 320,   0},  // v
   {54, DVT,   0},  // n
   {56, DVT,   0},  // /
   {55, DVT,  20},  // ,
   {58,  50,  10},  // down
   {63, 200,   0},  // s
-  {64, DVT,   0},  // f
+  {64, 200,   0},  // f
   /* {64,  50,  50},  // f */
   {65, DVT, 300},  // h
   {66, 150, DTI},  // k
@@ -97,6 +99,7 @@ const int special_voltage_thresholds[][3] = {
   /* {75,  30,  30},  // w */
   {77, DVT, 600},  // y
   {86, DVT,  20},  // `
+  {92, 200, DTI},  // =
   /* /\* {29, 260},  // g *\/ */
   /* /\* {44, 320},  // right_alt *\/ */
 };
